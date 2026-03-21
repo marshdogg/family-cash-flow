@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
-import { UserPlus, Check } from "lucide-react";
+import { UserPlus, Check, Save } from "lucide-react";
+import { useStore } from "@/hooks/useStore";
 
 type Cadence = "weekly" | "biweekly" | "monthly";
 
@@ -14,14 +15,62 @@ const CADENCE_OPTIONS: { value: Cadence; label: string; description: string }[] 
 ];
 
 export default function SettingsPage() {
+  const { settings, setSettings, loaded } = useStore();
+
+  const [householdName, setHouseholdName] = useState("");
+  const [threshold, setThreshold] = useState("");
   const [cadence, setCadence] = useState<Cadence>("weekly");
+  const [saved, setSaved] = useState(false);
+
+  // Sync local state from store once loaded
+  useEffect(() => {
+    if (loaded) {
+      setHouseholdName(settings.householdName);
+      setThreshold(String(settings.threshold));
+      setCadence(settings.cadence as Cadence);
+    }
+  }, [loaded, settings]);
+
+  const handleSave = () => {
+    setSettings({
+      householdName: householdName.trim() || "Our Household",
+      threshold: parseInt(threshold) || 500,
+      cadence,
+    });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  if (!loaded) return null;
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8">
-          <h1 className="mb-6 text-[20px] font-bold text-gray-900">Settings</h1>
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-[20px] font-bold text-gray-900">Settings</h1>
+            <button
+              onClick={handleSave}
+              className={`flex items-center gap-2 rounded-md px-5 py-2.5 text-[13px] font-bold text-white shadow-md transition-all ${
+                saved
+                  ? "bg-positive"
+                  : "bg-purple-500 hover:bg-purple-600 hover:shadow-glow"
+              }`}
+            >
+              {saved ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Saved
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Settings
+                </>
+              )}
+            </button>
+          </div>
 
           {/* Household */}
           <div className="rounded-lg bg-white p-5 shadow-md">
@@ -31,7 +80,8 @@ export default function SettingsPage() {
                 <label className="text-[12px] font-semibold text-gray-500">Household Name</label>
                 <input
                   type="text"
-                  defaultValue="Our Household"
+                  value={householdName}
+                  onChange={(e) => setHouseholdName(e.target.value)}
                   className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2.5 text-[14px] focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 />
               </div>
@@ -41,7 +91,8 @@ export default function SettingsPage() {
                   <span className="border-r border-gray-200 bg-gray-50 px-3 py-2.5 font-mono text-[13px] text-gray-400">$</span>
                   <input
                     type="text"
-                    defaultValue="500"
+                    value={threshold}
+                    onChange={(e) => setThreshold(e.target.value.replace(/[^0-9]/g, ""))}
                     className="flex-1 border-none px-3 py-2.5 font-mono text-[14px] outline-none"
                   />
                 </div>
