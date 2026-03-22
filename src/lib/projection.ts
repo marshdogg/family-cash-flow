@@ -180,7 +180,8 @@ export function buildWhatIfProjection(
   income: IncomeSource[],
   investments: Investment[],
   whatIfItems: { name: string; amount: number; frequency: string; type: "expense" | "income" | "investment" }[],
-  viewMode: ViewMode
+  viewMode: ViewMode,
+  plannedEvents: PlannedEvent[] = []
 ): ProjectionPeriod[] {
   // Inject what-if items as temporary entries
   const today = new Date().toISOString().slice(0, 10);
@@ -199,7 +200,8 @@ export function buildWhatIfProjection(
     [...bills, ...extraBills],
     [...income, ...extraIncome],
     [...investments, ...extraInvestments],
-    viewMode
+    viewMode,
+    plannedEvents
   );
 }
 

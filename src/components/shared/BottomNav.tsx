@@ -3,18 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ClipboardCheck, Receipt, Wallet, CalendarHeart, TrendingUp, Settings, MoreHorizontal, X } from "lucide-react";
+import { Home, Receipt, Wallet, CalendarHeart, TrendingUp, Settings, MoreHorizontal, X } from "lucide-react";
 
 const PRIMARY_ITEMS = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/check-in", label: "Check-In", icon: ClipboardCheck },
   { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/income", label: "Income", icon: Wallet },
+  { href: "/plans", label: "Plans", icon: CalendarHeart },
 ];
 
 const MORE_ITEMS = [
   { href: "/investments", label: "Investments", icon: TrendingUp },
-  { href: "/plans", label: "Plans & Events", icon: CalendarHeart },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

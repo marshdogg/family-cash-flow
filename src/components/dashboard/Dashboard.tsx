@@ -67,9 +67,9 @@ export function Dashboard() {
 
   const whatIfPeriods = useMemo(
     () => whatIfItems.length > 0
-      ? buildWhatIfProjection(balance, bills, income, investments, whatIfItems, viewMode)
+      ? buildWhatIfProjection(balance, bills, income, investments, whatIfItems, viewMode, plannedEvents)
       : undefined,
-    [balance, bills, income, investments, whatIfItems, viewMode]
+    [balance, bills, income, investments, whatIfItems, viewMode, plannedEvents]
   );
 
   const whatIfMonthlyImpact = useMemo(() => {
@@ -252,13 +252,14 @@ export function Dashboard() {
         </div>
 
         {/* Right: Activity Feed */}
-        <div className="space-y-1">
-          <h3 className="text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
+        <div className="overflow-hidden rounded-lg bg-white shadow-md">
           {activityFeed.length > 0 ? (
-            activityFeed.map((item, i) => (
+            <div>
+              <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
+            {activityFeed.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-3.5 py-3 transition-colors hover:border-gray-200"
+                className="flex items-center gap-3 border-b border-gray-100 px-3.5 py-3 last:border-b-0 transition-colors hover:bg-gray-50"
               >
                 <div
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-[13px]"
@@ -290,7 +291,8 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-            ))
+            ))}
+            </div>
           ) : (
             <p className="py-8 text-center text-[12px] text-gray-400">
               No upcoming expenses

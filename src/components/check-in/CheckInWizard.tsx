@@ -161,7 +161,7 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
         {/* Step 3: Summary */}
         {step === 3 && (
           <div>
-            <h2 className="text-[20px] font-bold text-gray-900">Your cash flow summary</h2>
+            <h2 className="text-[20px] font-bold text-gray-900">Your financial summary</h2>
             <p className="mt-1 text-[13px] text-gray-500">Here&apos;s where you stand for the next 12 weeks.</p>
 
             <div className="mt-6 space-y-3">
