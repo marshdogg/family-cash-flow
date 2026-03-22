@@ -477,7 +477,7 @@ export function Dashboard() {
         <div className="overflow-hidden rounded-lg bg-white shadow-md">
           {activityFeed.length > 0 ? (
             <div>
-              <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
+              <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING TRANSACTIONS</h3>
             {activityFeed.map((item, i) => (
               <button
                 key={i}
