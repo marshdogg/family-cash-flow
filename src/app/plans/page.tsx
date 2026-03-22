@@ -75,13 +75,13 @@ function PlansPage() {
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
           <SetupBanner currentStep="plans" />
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="text-[24px] font-bold text-gray-900">Plans & Events</h1>
+            <h1 className="text-[24px] font-bold text-gray-900">Savings Goals</h1>
             <button
               onClick={() => { setEditTarget(null); setShowForm(true); }}
               className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               <Plus className="h-4 w-4" />
-              Add Plan
+              Add Goal
             </button>
           </div>
 
@@ -137,13 +137,13 @@ function PlansPage() {
             {plannedEvents.length === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="text-[36px]">{"\uD83D\uDCC5"}</div>
-                <h2 className="mt-3 text-[17px] font-bold text-gray-900">No planned events yet</h2>
+                <h2 className="mt-3 text-[17px] font-bold text-gray-900">No savings goals yet</h2>
                 <p className="mt-1 text-[13px] text-gray-500">Track upcoming trips, camps, seasonal expenses, and other big-ticket items.</p>
                 <button
                   onClick={() => { setEditTarget(null); setShowForm(true); }}
                   className="mt-4 rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
                 >
-                  Add Your First Plan
+                  Add Your First Goal
                 </button>
               </div>
             ) : (
@@ -235,7 +235,7 @@ function PlansPage() {
       {deleteTarget && (
         <ConfirmDialog
           title={`Delete ${deleteTarget.name}?`}
-          message="This planned event will be permanently removed from your cash flow projections."
+          message="This savings goal will be permanently removed from your cash flow projections."
           onConfirm={() => { removePlannedEvent(deleteTarget.id); setDeleteTarget(null); }}
           onCancel={() => setDeleteTarget(null)}
         />

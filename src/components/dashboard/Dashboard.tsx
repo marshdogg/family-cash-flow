@@ -243,7 +243,7 @@ export function Dashboard() {
       {
         num: 3,
         done: hasPlans,
-        title: "Add a plan or event",
+        title: "Add a savings goal",
         description: "Upcoming trips, tuition, big purchases — things you're saving toward.",
         icon: "📅",
         href: "/plans",
@@ -386,7 +386,7 @@ export function Dashboard() {
           )}
           {displaySavings > 0 && (
             <div>
-              <p className="text-[11px] font-medium text-gray-400">Plan Savings</p>
+              <p className="text-[11px] font-medium text-gray-400">Goal Savings</p>
               <p className="font-mono text-[14px] font-bold text-amber-500 sm:text-[18px]">
                 −{formatCurrency(displaySavings)}
                 <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>

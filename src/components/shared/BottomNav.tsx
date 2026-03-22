@@ -9,7 +9,7 @@ const PRIMARY_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/income", label: "Income", icon: Wallet },
-  { href: "/plans", label: "Plans", icon: CalendarHeart },
+  { href: "/plans", label: "Goals", icon: CalendarHeart },
 ];
 
 const MORE_ITEMS = [

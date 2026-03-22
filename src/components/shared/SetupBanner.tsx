@@ -15,7 +15,7 @@ export function SetupBanner({ currentStep }: { currentStep: "income" | "expenses
   const steps = [
     { key: "income" as const, done: income.length > 0, label: "Income" },
     { key: "expenses" as const, done: bills.length > 0, label: "Expenses" },
-    { key: "plans" as const, done: plannedEvents.length > 0, label: "Plans" },
+    { key: "plans" as const, done: plannedEvents.length > 0, label: "Goals" },
     { key: "check-in" as const, done: !!latestCheckIn, label: "Check-in" },
   ];
 

@@ -91,7 +91,7 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-xl max-h-[85vh] sm:max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 id="plan-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Plan" : "Add Planned Event"}</h2>
+          <h2 id="plan-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Goal" : "Add Savings Goal"}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
             <X className="h-4 w-4" />
           </button>

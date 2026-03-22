@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { href: "/income", label: "Income", icon: Wallet },
   { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/investments", label: "Investments", icon: TrendingUp },
-  { href: "/plans", label: "Plans & Events", icon: CalendarHeart },
+  { href: "/plans", label: "Savings Goals", icon: CalendarHeart },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
