@@ -89,6 +89,14 @@ function BillsPage() {
             </button>
           </div>
 
+          {/* Info banner */}
+          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+            <span className="mt-px text-[14px]">💡</span>
+            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
+              Expenses are recurring costs that reduce your bank balance — rent, utilities, groceries, subscriptions. They&apos;re the foundation of your cash flow projection.
+            </p>
+          </div>
+
           {/* ── Hero Cards ── */}
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all active recurring expenses, normalized to a monthly amount">
@@ -130,14 +138,6 @@ function BillsPage() {
                 per week average
               </p>
             </div>
-          </div>
-
-          {/* Info banner */}
-          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
-            <span className="mt-px text-[14px]">💡</span>
-            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
-              Expenses are recurring costs that reduce your bank balance — rent, utilities, groceries, subscriptions. They&apos;re the foundation of your cash flow projection.
-            </p>
           </div>
 
           <div className="overflow-hidden rounded-lg bg-white shadow-md">

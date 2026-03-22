@@ -48,6 +48,14 @@ export default function InvestmentsPage() {
             </button>
           </div>
 
+          {/* Info banner */}
+          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+            <span className="mt-px text-[14px]">💡</span>
+            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
+              Investments are cash outflows that build your net worth. They reduce your bank balance but aren&apos;t expenses — they&apos;re tracked separately so you can see the full picture.
+            </p>
+          </div>
+
           <div className="mb-5 grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all recurring investment contributions, normalized to a monthly amount">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Monthly Contributions</p>
@@ -63,14 +71,6 @@ export default function InvestmentsPage() {
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">{oneTime.length} planned</p>
             </div>
-          </div>
-
-          {/* Info banner */}
-          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
-            <span className="mt-px text-[14px]">💡</span>
-            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
-              Investments are cash outflows that build your net worth. They reduce your bank balance but aren&apos;t expenses — they&apos;re tracked separately so you can see the full picture.
-            </p>
           </div>
 
           <div className="overflow-hidden rounded-lg bg-white shadow-md">
