@@ -35,7 +35,7 @@ const EVENT_ICONS: Record<string, string> = {
 };
 
 export function Dashboard() {
-  const { bills, income, investments, plannedEvents, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, monthlyAvailableToSpend, checkIns, settings, loaded } = useSharedStore();
+  const { bills, income, investments, plannedEvents, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, totalMonthlyInvestments, totalMonthlySavingsNeeded, monthlyAvailableToSpend, checkIns, settings, loaded } = useSharedStore();
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
@@ -49,6 +49,8 @@ export function Dashboard() {
   const periodLabel = viewMode === "weekly" ? "/wk" : viewMode === "biweekly" ? "/2wk" : "/mo";
   const displayIncome = Math.round(weeklyIncome * scale);
   const displayExpenses = Math.round(weeklyExpenses * scale);
+  const displayInvestments = Math.round((totalMonthlyInvestments / (52 / 12)) * scale);
+  const displaySavings = Math.round((totalMonthlySavingsNeeded / (52 / 12)) * scale);
   const weeklyAvailable = monthlyAvailableToSpend / (52 / 12);
   const displayAvailable = Math.round(viewMode === "weekly" ? weeklyAvailable : viewMode === "biweekly" ? weeklyAvailable * 2 : monthlyAvailableToSpend);
 
@@ -169,6 +171,24 @@ export function Dashboard() {
               <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
             </p>
           </div>
+          {displayInvestments > 0 && (
+            <div>
+              <p className="text-[11px] font-medium text-gray-400">Investments</p>
+              <p className="font-mono text-[18px] font-bold text-purple-500">
+                −{formatCurrency(displayInvestments)}
+                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              </p>
+            </div>
+          )}
+          {displaySavings > 0 && (
+            <div>
+              <p className="text-[11px] font-medium text-gray-400">Plan Savings</p>
+              <p className="font-mono text-[18px] font-bold text-amber-500">
+                −{formatCurrency(displaySavings)}
+                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              </p>
+            </div>
+          )}
           <div>
             <p className="text-[11px] font-medium text-gray-400">Available</p>
             <p className={`font-mono text-[18px] font-bold ${displayAvailable >= 0 ? "text-purple-600" : "text-red-500"}`}>
