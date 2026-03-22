@@ -351,13 +351,13 @@ export function Dashboard() {
       </div>
 
       {/* ── Toggle + What If ── */}
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-[3px]">
+      <div className="mt-5 flex items-center justify-between">
+        <div className="flex flex-1 gap-1 rounded-lg bg-gray-100 p-[3px] sm:flex-initial">
           {VIEW_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => { setViewMode(opt.value); setSelectedPeriod(null); }}
-              className={`rounded-md px-4 py-2 text-[13px] font-bold transition-colors ${
+              className={`flex-1 rounded-md px-4 py-2 text-[13px] font-bold transition-colors sm:flex-initial ${
                 viewMode === opt.value
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-400 hover:text-gray-600"
@@ -368,10 +368,11 @@ export function Dashboard() {
           ))}
         </div>
 
+        {/* Desktop: What If beside toggle */}
         {!whatIfOpen && (
           <button
             onClick={() => setWhatIfOpen(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:w-auto"
+            className="hidden items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:flex"
           >
             <Sparkles className="h-4 w-4" />
             What If
@@ -399,6 +400,17 @@ export function Dashboard() {
               threshold={settings.threshold}
               onClose={() => setSelectedPeriod(null)}
             />
+          )}
+
+          {/* Mobile: What If button below chart */}
+          {!whatIfOpen && (
+            <button
+              onClick={() => setWhatIfOpen(true)}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:hidden"
+            >
+              <Sparkles className="h-4 w-4" />
+              What If
+            </button>
           )}
 
           {/* Desktop: inline What If panel */}
