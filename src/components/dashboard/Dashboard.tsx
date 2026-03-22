@@ -351,7 +351,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Toggle + What If ── */}
-      <div className="mt-5 flex items-center justify-between">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-1 rounded-lg bg-gray-100 p-[3px]">
           {VIEW_OPTIONS.map((opt) => (
             <button
@@ -371,7 +371,7 @@ export function Dashboard() {
         {!whatIfOpen && (
           <button
             onClick={() => setWhatIfOpen(true)}
-            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:w-auto"
           >
             <Sparkles className="h-4 w-4" />
             What If
@@ -401,8 +401,9 @@ export function Dashboard() {
             />
           )}
 
+          {/* Desktop: inline What If panel */}
           {whatIfOpen && (
-            <div className="mt-4">
+            <div className="mt-4 hidden lg:block">
               <WhatIfPanel
                 items={whatIfItems}
                 onAdd={handleAddWhatIf}
@@ -466,6 +467,24 @@ export function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Mobile: bottom sheet What If panel */}
+      {whatIfOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/30" onClick={() => { setWhatIfOpen(false); setWhatIfItems([]); }} />
+          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white px-4 pb-24 pt-4 shadow-xl">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
+            <WhatIfPanel
+              items={whatIfItems}
+              onAdd={handleAddWhatIf}
+              onRemove={handleRemoveWhatIf}
+              onClear={() => setWhatIfItems([])}
+              onClose={() => { setWhatIfOpen(false); setWhatIfItems([]); }}
+              monthlyImpact={whatIfMonthlyImpact}
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   );
