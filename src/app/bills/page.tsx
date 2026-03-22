@@ -67,7 +67,7 @@ export default function BillsPage() {
 
           {/* ── Hero Cards ── */}
           <div className="mb-5 grid grid-cols-3 gap-3">
-            <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all active recurring expenses, normalized to a monthly amount">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">This Month</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-red-500">
                 −{formatCurrency(Math.round(totalMonthlyBills))}
@@ -76,7 +76,7 @@ export default function BillsPage() {
                 {activeBills.length} active expenses
               </p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="rounded-lg bg-white p-4 shadow-md" title="Fixed: housing, insurance, loans, subscriptions, childcare. Variable: everything else.">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Fixed vs Variable</p>
               <div className="mt-2 space-y-1">
                 <div className="flex items-center justify-between text-[12px]">
@@ -97,7 +97,7 @@ export default function BillsPage() {
                 <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-200" />Variable</span>
               </div>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="rounded-lg bg-white p-4 shadow-md" title="Your monthly expenses divided into a weekly average — useful for weekly budgeting">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Weekly Burn</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-gray-900">
                 {formatCurrency(Math.round(totalMonthlyBills / (52 / 12)))}
@@ -106,6 +106,14 @@ export default function BillsPage() {
                 per week average
               </p>
             </div>
+          </div>
+
+          {/* Info banner */}
+          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+            <span className="mt-px text-[14px]">💡</span>
+            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
+              Expenses are recurring costs that reduce your bank balance — rent, utilities, groceries, subscriptions. They&apos;re the foundation of your cash flow projection.
+            </p>
           </div>
 
           <div className="overflow-hidden rounded-lg bg-white shadow-md">

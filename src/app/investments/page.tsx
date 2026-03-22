@@ -49,14 +49,14 @@ export default function InvestmentsPage() {
           </div>
 
           <div className="mb-5 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all recurring investment contributions, normalized to a monthly amount">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Monthly Contributions</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-purple-500">
                 {formatCurrency(Math.round(totalMonthlyInvestments))}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">{recurring.length} active investments</p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="rounded-lg bg-white p-4 shadow-md" title="One-time lump sum investments that aren't recurring contributions">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Upcoming Lump Sums</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-blue-500">
                 {formatCurrency(totalOneTime)}
