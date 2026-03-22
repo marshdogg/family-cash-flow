@@ -32,13 +32,13 @@ export default function BillsPage() {
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="text-[20px] font-bold text-gray-900">Bills & Expenses</h1>
+            <h1 className="text-[20px] font-bold text-gray-900">Expenses</h1>
             <button
               onClick={() => setShowForm(true)}
               className="flex items-center gap-2 rounded-md bg-purple-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
             >
               <Plus className="h-4 w-4" />
-              Add Bill
+              Add Expense
             </button>
           </div>
 
@@ -48,7 +48,7 @@ export default function BillsPage() {
               −{formatCurrency(Math.round(totalMonthlyBills))}
             </p>
             <p className="mt-0.5 text-[11px] text-gray-400">
-              {bills.filter((b) => b.status === "active").length} active bills & expenses
+              {bills.filter((b) => b.status === "active").length} active expenses
             </p>
           </div>
 
@@ -56,8 +56,8 @@ export default function BillsPage() {
             {bills.length === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="text-[36px]">📋</div>
-                <h2 className="mt-3 text-[17px] font-bold text-gray-900">No bills yet</h2>
-                <p className="mt-1 text-[13px] text-gray-500">Add your recurring bills to start tracking expenses.</p>
+                <h2 className="mt-3 text-[17px] font-bold text-gray-900">No expenses yet</h2>
+                <p className="mt-1 text-[13px] text-gray-500">Add your recurring expenses to start tracking expenses.</p>
               </div>
             ) : (
               bills.map((bill) => {

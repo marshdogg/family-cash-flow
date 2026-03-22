@@ -92,7 +92,7 @@ export function Dashboard() {
 
       {upcomingBills.length > 0 && (
         <div className="mt-6">
-          <h2 className="mb-3 text-[15px] font-bold text-gray-900">Upcoming Bills</h2>
+          <h2 className="mb-3 text-[15px] font-bold text-gray-900">Upcoming Expenses</h2>
           <UpcomingBills bills={upcomingBills} />
         </div>
       )}

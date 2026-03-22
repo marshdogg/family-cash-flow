@@ -16,7 +16,7 @@ export function QuickActions() {
         className="flex flex-1 items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-3 text-[13px] font-semibold text-gray-700 transition-colors hover:border-purple-200 hover:bg-purple-50 hover:text-purple-600"
       >
         <Plus className="h-4 w-4" />
-        Add Bill
+        Add Expense
       </Link>
     </div>
   );

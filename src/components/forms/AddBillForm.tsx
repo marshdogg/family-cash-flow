@@ -58,7 +58,7 @@ export function AddBillForm({ onSubmit, onClose }: AddBillFormProps) {
       <div className="relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-[16px] font-bold text-gray-900">Add Bill</h2>
+          <h2 className="text-[16px] font-bold text-gray-900">Add Expense</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
             <X className="h-4 w-4" />
           </button>
@@ -151,7 +151,7 @@ export function AddBillForm({ onSubmit, onClose }: AddBillFormProps) {
               Cancel
             </button>
             <button type="submit" className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600">
-              Add Bill
+              Add Expense
             </button>
           </div>
         </form>

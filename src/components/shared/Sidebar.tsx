@@ -7,7 +7,7 @@ import { Home, ClipboardCheck, Receipt, Wallet, Settings } from "lucide-react";
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/check-in", label: "Weekly Check-In", icon: ClipboardCheck },
-  { href: "/bills", label: "Bills & Expenses", icon: Receipt },
+  { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/income", label: "Income", icon: Wallet },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

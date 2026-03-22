@@ -13,7 +13,7 @@ interface CheckInWizardProps {
   onCancel: () => void;
 }
 
-const STEPS = ["Bank Balance", "Review Bills", "Review Income", "Summary"];
+const STEPS = ["Bank Balance", "Review Expenses", "Review Income", "Summary"];
 
 export function CheckInWizard({ bills, income, previousBalance, onComplete, onCancel }: CheckInWizardProps) {
   const [step, setStep] = useState(0);
@@ -108,11 +108,11 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
           </div>
         )}
 
-        {/* Step 1: Review Bills */}
+        {/* Step 1: Review Expenses */}
         {step === 1 && (
           <div>
-            <h2 className="text-[20px] font-bold text-gray-900">Your recurring bills</h2>
-            <p className="mt-1 text-[13px] text-gray-500">{activeBills.length} active bills totaling {formatCurrency(Math.round(weeklyExpenses))}/week</p>
+            <h2 className="text-[20px] font-bold text-gray-900">Your recurring expenses</h2>
+            <p className="mt-1 text-[13px] text-gray-500">{activeBills.length} active expenses totaling {formatCurrency(Math.round(weeklyExpenses))}/week</p>
 
             <div className="mt-4 max-h-[360px] space-y-1.5 overflow-y-auto">
               {activeBills.map((bill) => (
@@ -127,7 +127,7 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
                 </div>
               ))}
               {activeBills.length === 0 && (
-                <p className="py-8 text-center text-[13px] text-gray-400">No bills yet. Add some from the Bills page.</p>
+                <p className="py-8 text-center text-[13px] text-gray-400">No expenses yet. Add some from the Expenses page.</p>
               )}
             </div>
           </div>
