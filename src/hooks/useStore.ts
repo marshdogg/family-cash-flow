@@ -188,6 +188,21 @@ export function useStore() {
     setPlannedEvents((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
+  const updatePlannedEvent = useCallback(async (id: string, event: Omit<PlannedEvent, "id" | "status">) => {
+    const status = event.savedSoFar >= event.amount ? "funded" : "saving";
+    const { data } = await supabase.from("planned_events").update({
+      name: event.name, category: event.category, amount: event.amount,
+      target_date: event.targetDate, saved_so_far: event.savedSoFar, status,
+    }).eq("id", id).select().single();
+    if (data) {
+      setPlannedEvents((prev) => prev.map((e) => e.id === id ? {
+        id: data.id, name: data.name, category: data.category,
+        amount: Number(data.amount), targetDate: data.target_date,
+        savedSoFar: Number(data.saved_so_far), status: data.status,
+      } : e));
+    }
+  }, []);
+
   const updatePlannedEventSaved = useCallback(async (id: string, savedSoFar: number) => {
     const event = plannedEvents.find((e) => e.id === id);
     if (!event) return;
@@ -300,6 +315,7 @@ export function useStore() {
     updateInvestment,
     removeInvestment,
     addPlannedEvent,
+    updatePlannedEvent,
     removePlannedEvent,
     updatePlannedEventSaved,
     addCheckIn,

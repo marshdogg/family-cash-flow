@@ -236,9 +236,9 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* ── Two Column: Chart + Activity Feed ── */}
-      <div className="mt-4 grid items-start gap-6 lg:grid-cols-[1fr_300px]">
-        {/* Left: Chart */}
+      {/* ── Stacked: Chart then Activity Feed ── */}
+      <div className="mt-4 space-y-4">
+        {/* Chart */}
         <div>
           <ProjectionChart
             periods={periods}

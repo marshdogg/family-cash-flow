@@ -8,6 +8,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AddPlanForm } from "@/components/forms/AddPlanForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
+import type { PlannedEvent } from "@/lib/types";
 
 const PLAN_ICONS: Record<string, { icon: string; bg: string }> = {
   trip: { icon: "\u2708\uFE0F", bg: "#E8F2FF" },
@@ -21,8 +22,9 @@ const PLAN_ICONS: Record<string, { icon: string; bg: string }> = {
 };
 
 export default function PlansPage() {
-  const { plannedEvents, addPlannedEvent, removePlannedEvent, loaded } = useSharedStore();
+  const { plannedEvents, addPlannedEvent, updatePlannedEvent, removePlannedEvent, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<PlannedEvent | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
@@ -45,10 +47,10 @@ export default function PlansPage() {
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="text-[20px] font-bold text-gray-900">Plans & Events</h1>
+            <h1 className="text-[24px] font-bold text-gray-900">Plans & Events</h1>
             <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 rounded-md bg-purple-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
+              onClick={() => { setEditTarget(null); setShowForm(true); }}
+              className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               <Plus className="h-4 w-4" />
               Add Plan
@@ -121,7 +123,8 @@ export default function PlansPage() {
                 return (
                   <div
                     key={event.id}
-                    className="group border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+                    onClick={() => { setEditTarget(event); setShowForm(true); }}
+                    className="group cursor-pointer border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -149,7 +152,7 @@ export default function PlansPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => setDeleteTarget({ id: event.id, name: event.name })}
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: event.id, name: event.name }); }}
                         className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                         aria-label={`Delete ${event.name}`}
                       >
@@ -179,11 +182,17 @@ export default function PlansPage() {
 
       {showForm && (
         <AddPlanForm
+          initialData={editTarget ? { name: editTarget.name, category: editTarget.category, amount: editTarget.amount, savedSoFar: editTarget.savedSoFar, targetDate: editTarget.targetDate } : undefined}
           onSubmit={(data) => {
-            addPlannedEvent(data);
+            if (editTarget) {
+              updatePlannedEvent(editTarget.id, data);
+            } else {
+              addPlannedEvent(data);
+            }
             setShowForm(false);
+            setEditTarget(null);
           }}
-          onClose={() => setShowForm(false)}
+          onClose={() => { setShowForm(false); setEditTarget(null); }}
         />
       )}
 

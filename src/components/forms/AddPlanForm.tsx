@@ -16,17 +16,21 @@ const CATEGORIES: { value: PlannedEventCategory; label: string; icon: string }[]
   { value: "other", label: "Other", icon: "\uD83D\uDCCB" },
 ];
 
+interface PlanData { name: string; category: PlannedEventCategory; amount: number; savedSoFar: number; targetDate: string }
+
 interface AddPlanFormProps {
-  onSubmit: (data: { name: string; category: PlannedEventCategory; amount: number; savedSoFar: number; targetDate: string }) => void;
+  onSubmit: (data: PlanData) => void;
   onClose: () => void;
+  initialData?: PlanData;
 }
 
-export function AddPlanForm({ onSubmit, onClose }: AddPlanFormProps) {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState<PlannedEventCategory>("other");
-  const [amount, setAmount] = useState("");
-  const [savedSoFar, setSavedSoFar] = useState("");
-  const [targetDate, setTargetDate] = useState("");
+export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps) {
+  const isEdit = !!initialData;
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [category, setCategory] = useState<PlannedEventCategory>(initialData?.category ?? "other");
+  const [amount, setAmount] = useState(initialData ? String(initialData.amount) : "");
+  const [savedSoFar, setSavedSoFar] = useState(initialData ? String(initialData.savedSoFar) : "");
+  const [targetDate, setTargetDate] = useState(initialData?.targetDate ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const trapRef = useFocusTrap();
@@ -52,7 +56,7 @@ export function AddPlanForm({ onSubmit, onClose }: AddPlanFormProps) {
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 id="plan-dialog-title" className="text-[16px] font-bold text-gray-900">Add Planned Event</h2>
+          <h2 id="plan-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Plan" : "Add Planned Event"}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
             <X className="h-4 w-4" />
           </button>
@@ -158,7 +162,7 @@ export function AddPlanForm({ onSubmit, onClose }: AddPlanFormProps) {
               Cancel
             </button>
             <button type="submit" disabled={saving} className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600 disabled:opacity-50">
-              {saving ? "Adding..." : "Add Plan"}
+              {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Plan"}
             </button>
           </div>
         </form>
