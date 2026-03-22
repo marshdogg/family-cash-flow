@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
+import { Sparkles } from "lucide-react";
 import { BalanceHero } from "./BalanceHero";
 import { ProjectionChart } from "./ProjectionChart";
 import { UpcomingBills } from "./UpcomingBills";
 import { QuickActions } from "./QuickActions";
+import { WhatIfPanel } from "./WhatIfPanel";
+import type { WhatIfItem } from "./WhatIfPanel";
 import { useSharedStore } from "@/hooks/StoreProvider";
-import { buildProjection, projectionTitle } from "@/lib/projection";
+import { buildProjection, buildWhatIfProjection, projectionTitle } from "@/lib/projection";
 import type { ViewMode } from "@/lib/projection";
 
 const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
@@ -18,6 +21,8 @@ const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
 export function Dashboard() {
   const { bills, income, investments, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useSharedStore();
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
+  const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
 
   const balance = latestCheckIn?.bankBalance ?? 0;
   const weeklyExpenses = totalMonthlyBills / (52 / 12);
@@ -35,6 +40,37 @@ export function Dashboard() {
     () => buildProjection(balance, bills, income, investments, viewMode),
     [balance, bills, income, investments, viewMode]
   );
+
+  const whatIfPeriods = useMemo(
+    () => whatIfItems.length > 0
+      ? buildWhatIfProjection(balance, bills, income, investments, whatIfItems, viewMode)
+      : undefined,
+    [balance, bills, income, investments, whatIfItems, viewMode]
+  );
+
+  // Monthly impact of what-if items
+  const whatIfMonthlyImpact = useMemo(() => {
+    const toMonthly = (amount: number, freq: string) => {
+      if (freq === "weekly") return amount * (52 / 12);
+      if (freq === "biweekly") return amount * (26 / 12);
+      if (freq === "semimonthly") return amount * 2;
+      if (freq === "quarterly") return amount / 3;
+      if (freq === "annually") return amount / 12;
+      return amount;
+    };
+    return whatIfItems.reduce((sum, item) => {
+      const monthly = toMonthly(item.amount, item.frequency);
+      return sum + (item.type === "income" ? monthly : -monthly);
+    }, 0);
+  }, [whatIfItems]);
+
+  const handleAddWhatIf = useCallback((item: WhatIfItem) => {
+    setWhatIfItems((prev) => [...prev, item]);
+  }, []);
+
+  const handleRemoveWhatIf = useCallback((index: number) => {
+    setWhatIfItems((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   // Upcoming bills (next 14 days)
   const upcomingBills = useMemo(() => {
@@ -70,24 +106,49 @@ export function Dashboard() {
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[15px] font-bold text-gray-900">{projectionTitle(viewMode)}</h2>
-          <div className="flex gap-0.5 rounded-lg bg-gray-100 p-[3px]">
-            {VIEW_OPTIONS.map((opt) => (
+          <div className="flex items-center gap-2">
+            {!whatIfOpen && (
               <button
-                key={opt.value}
-                onClick={() => setViewMode(opt.value)}
-                className={`rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors ${
-                  viewMode === opt.value
-                    ? "bg-white text-purple-600 shadow-sm"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-                title={opt.value === "weekly" ? "Weekly" : opt.value === "biweekly" ? "Biweekly" : "Monthly"}
+                onClick={() => setWhatIfOpen(true)}
+                className="flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-[12px] font-bold text-amber-700 transition-colors hover:bg-amber-100"
               >
-                {opt.label}
+                <Sparkles className="h-3.5 w-3.5" />
+                What If
               </button>
-            ))}
+            )}
+            <div className="flex gap-0.5 rounded-lg bg-gray-100 p-[3px]">
+              {VIEW_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setViewMode(opt.value)}
+                  className={`rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors ${
+                    viewMode === opt.value
+                      ? "bg-white text-purple-600 shadow-sm"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                  title={opt.value === "weekly" ? "Weekly" : opt.value === "biweekly" ? "Biweekly" : "Monthly"}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-        <ProjectionChart periods={periods} threshold={settings.threshold} />
+
+        <ProjectionChart periods={periods} whatIfPeriods={whatIfPeriods} threshold={settings.threshold} />
+
+        {whatIfOpen && (
+          <div className="mt-4">
+            <WhatIfPanel
+              items={whatIfItems}
+              onAdd={handleAddWhatIf}
+              onRemove={handleRemoveWhatIf}
+              onClear={() => setWhatIfItems([])}
+              onClose={() => { setWhatIfOpen(false); setWhatIfItems([]); }}
+              monthlyImpact={whatIfMonthlyImpact}
+            />
+          </div>
+        )}
       </div>
 
       {upcomingBills.length > 0 && (

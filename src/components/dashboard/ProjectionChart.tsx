@@ -13,6 +13,7 @@ interface Period {
 
 interface ProjectionChartProps {
   periods: Period[];
+  whatIfPeriods?: Period[];
   threshold: number;
 }
 
@@ -24,7 +25,7 @@ interface HitArea {
   index: number;
 }
 
-export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
+export function ProjectionChart({ periods, whatIfPeriods, threshold }: ProjectionChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -47,11 +48,12 @@ export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
   const chartData = useMemo(() => {
     if (periods.length === 0) return null;
     const balances = periods.map((p) => p.balance);
-    const allVals = [...balances, threshold];
+    const whatIfBalances = whatIfPeriods?.map((p) => p.balance) ?? [];
+    const allVals = [...balances, ...whatIfBalances, threshold];
     const minVal = Math.min(...allVals) * 0.85;
     const maxVal = Math.max(...allVals) * 1.1;
-    return { balances, minVal, maxVal, range: maxVal - minVal || 1 };
-  }, [periods, threshold]);
+    return { balances, whatIfBalances, minVal, maxVal, range: maxVal - minVal || 1 };
+  }, [periods, whatIfPeriods, threshold]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -134,6 +136,34 @@ export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
     ctx.strokeStyle = lineGradient;
     ctx.lineWidth = 2.5;
     ctx.stroke();
+
+    // What-if dashed line
+    const { whatIfBalances } = chartData;
+    if (whatIfBalances.length > 0) {
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = "#F59E0B";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(xScale(0), yScale(whatIfBalances[0]));
+      for (let i = 1; i < whatIfBalances.length; i++) {
+        const cx = (xScale(i - 1) + xScale(i)) / 2;
+        ctx.bezierCurveTo(cx, yScale(whatIfBalances[i - 1]), cx, yScale(whatIfBalances[i]), xScale(i), yScale(whatIfBalances[i]));
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // What-if dots
+      whatIfBalances.forEach((bal, i) => {
+        const x = xScale(i);
+        const y = yScale(bal);
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = bal < threshold ? "#EF4444" : "#F59E0B";
+        ctx.fill();
+      });
+      ctx.restore();
+    }
 
     // Dots + hit areas
     const hitAreas: HitArea[] = [];
@@ -254,6 +284,16 @@ export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
           <div className="h-2 w-2 rounded-full bg-purple-500" />
           Balance
         </div>
+        {whatIfPeriods && whatIfPeriods.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            <div className="flex gap-0.5">
+              <div className="h-0.5 w-2 rounded-full bg-amber-400" />
+              <div className="h-0.5 w-1 rounded-full bg-amber-400" />
+              <div className="h-0.5 w-2 rounded-full bg-amber-400" />
+            </div>
+            What If
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <div className="flex gap-0.5">
             <div className="h-0.5 w-1.5 rounded-full bg-amber-400" />

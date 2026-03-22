@@ -112,6 +112,38 @@ export function buildProjection(
   return periods;
 }
 
+/**
+ * Build a what-if projection by injecting hypothetical items into the full calculation.
+ */
+export function buildWhatIfProjection(
+  startBalance: number,
+  bills: Bill[],
+  income: IncomeSource[],
+  investments: Investment[],
+  whatIfItems: { name: string; amount: number; frequency: string; type: "expense" | "income" | "investment" }[],
+  viewMode: ViewMode
+): ProjectionPeriod[] {
+  // Inject what-if items as temporary entries
+  const today = new Date().toISOString().slice(0, 10);
+  const extraBills: Bill[] = whatIfItems
+    .filter((i) => i.type === "expense")
+    .map((i, idx) => ({ id: `whatif-e-${idx}`, name: i.name, category: "other" as const, amount: i.amount, frequency: i.frequency as Bill["frequency"], nextDate: today, status: "active" as const }));
+  const extraIncome: IncomeSource[] = whatIfItems
+    .filter((i) => i.type === "income")
+    .map((i, idx) => ({ id: `whatif-i-${idx}`, name: i.name, category: "other" as const, amount: i.amount, frequency: i.frequency as IncomeSource["frequency"], nextDate: today, status: "active" as const }));
+  const extraInvestments: Investment[] = whatIfItems
+    .filter((i) => i.type === "investment")
+    .map((i, idx) => ({ id: `whatif-v-${idx}`, name: i.name, category: "other" as const, amount: i.amount, frequency: i.frequency as Investment["frequency"], nextDate: today, status: "active" as const }));
+
+  return buildProjection(
+    startBalance,
+    [...bills, ...extraBills],
+    [...income, ...extraIncome],
+    [...investments, ...extraInvestments],
+    viewMode
+  );
+}
+
 export function projectionTitle(viewMode: ViewMode): string {
   switch (viewMode) {
     case "weekly":    return "12-Week Projection";
