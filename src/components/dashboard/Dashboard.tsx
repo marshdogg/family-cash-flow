@@ -396,7 +396,7 @@ export function Dashboard() {
           <div>
             <p className="text-[11px] font-medium text-gray-400">Free Cash</p>
             <p className={`font-mono text-[14px] font-bold sm:text-[18px] ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
-              {formatCurrency(Math.abs(displayAvailable))}
+              {displayAvailable < 0 ? "−" : ""}{formatCurrency(Math.abs(displayAvailable))}
               <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
             </p>
           </div>
