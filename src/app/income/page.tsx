@@ -103,30 +103,25 @@ export default function IncomePage() {
           {/* Hero bar */}
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {/* Monthly Recurring */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Total of all recurring income sources, normalized to a monthly amount">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-emerald-500" />
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Monthly Recurring</p>
-              <p className="mt-1.5 font-mono text-[22px] font-semibold text-emerald-700">
+            <div className="rounded-lg border-l-[3px] border-l-emerald-500 bg-white p-4 shadow-md" title="Total of all recurring income sources, normalized to a monthly amount">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Monthly Recurring</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 +{formatCurrency(Math.round(totalMonthlyIncome))}
               </p>
-              <span className="mt-1.5 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
+              <p className="mt-0.5 text-[11px] text-gray-400">
                 {recurring.length} active source{recurring.length !== 1 ? "s" : ""}
-              </span>
+              </p>
               {topCategories && (
-                <p className="mt-1 text-[11px] text-gray-400">{topCategories}</p>
+                <p className="mt-0.5 text-[11px] text-gray-400">{topCategories}</p>
               )}
             </div>
 
             {/* YTD Earnings */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Estimated total income earned year-to-date based on recurring sources">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-green-500" />
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">YTD Earnings</p>
-              <p className="mt-1.5 font-mono text-[22px] font-semibold text-green-700">
+            <div className="rounded-lg border-l-[3px] border-l-green-500 bg-white p-4 shadow-md" title="Estimated total income earned year-to-date based on recurring sources">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">YTD Earnings</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 +{formatCurrency(ytdEarnings)}
               </p>
-              <span className="mt-1.5 inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800">
-                on pace
-              </span>
               <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-gray-100">
                 <div className="h-full rounded-full bg-green-500" style={{ width: `${yearProgress}%` }} />
               </div>
@@ -134,17 +129,16 @@ export default function IncomePage() {
             </div>
 
             {/* Upcoming One-Time */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="One-time income like bonuses or refunds that aren't recurring">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-amber-500" />
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Upcoming One-Time</p>
-              <p className="mt-1.5 font-mono text-[22px] font-semibold text-amber-700">
+            <div className="rounded-lg border-l-[3px] border-l-amber-500 bg-white p-4 shadow-md" title="One-time income like bonuses or refunds that aren't recurring">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Upcoming One-Time</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 +{formatCurrency(totalOneTime)}
               </p>
-              <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+              <p className="mt-0.5 text-[11px] text-gray-400">
                 {oneTime.length} expected
-              </span>
+              </p>
               {nextOneTime && (
-                <p className="mt-1 text-[11px] text-gray-400">
+                <p className="mt-0.5 text-[11px] text-gray-400">
                   Next: {nextOneTime.name} {new Date(nextOneTime.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </p>
               )}

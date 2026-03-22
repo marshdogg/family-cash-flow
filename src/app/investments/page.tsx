@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Plus, Trash2, TrendingUp, Calendar, Clock } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
@@ -95,28 +95,20 @@ export default function InvestmentsPage() {
 
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {/* Projected Annual */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Total of all recurring contributions projected over 12 months">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-purple-500 to-purple-300" />
-              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-purple-50">
-                <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Projected Annual</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-purple-600">
+            <div className="rounded-lg border-l-[3px] border-l-purple-500 bg-white p-4 shadow-md" title="Total of all recurring contributions projected over 12 months">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Projected Annual</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(projectedAnnual)}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">Based on current rate</p>
             </div>
 
             {/* Next Contribution */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Your next upcoming investment contribution">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-emerald-500 to-emerald-300" />
-              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50">
-                <Calendar className="h-3.5 w-3.5 text-emerald-600" />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Next Contribution</p>
+            <div className="rounded-lg border-l-[3px] border-l-green-500 bg-white p-4 shadow-md" title="Your next upcoming investment contribution">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Next Contribution</p>
               {nextContribution ? (
                 <>
-                  <p className="mt-1 text-[22px] font-semibold text-emerald-700">
+                  <p className="mt-1 text-[20px] font-semibold text-gray-900">
                     {new Date(nextContribution.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </p>
                   <p className="mt-0.5 text-[11px] text-gray-400">
@@ -125,20 +117,16 @@ export default function InvestmentsPage() {
                 </>
               ) : (
                 <>
-                  <p className="mt-1 text-[22px] font-semibold text-gray-300">—</p>
+                  <p className="mt-1 text-[20px] font-semibold text-gray-300">—</p>
                   <p className="mt-0.5 text-[11px] text-gray-400">No recurring investments</p>
                 </>
               )}
             </div>
 
             {/* YTD Contributed */}
-            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Estimated total contributions year-to-date">
-              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-amber-500 to-amber-300" />
-              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-amber-50">
-                <Clock className="h-3.5 w-3.5 text-amber-600" />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">YTD Contributed</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-amber-700">
+            <div className="rounded-lg border-l-[3px] border-l-amber-500 bg-white p-4 shadow-md" title="Estimated total contributions year-to-date">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">YTD Contributed</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(ytdContributed)}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">{ytdLabel}</p>

@@ -103,17 +103,17 @@ function BillsPage() {
 
           {/* ── Hero Cards ── */}
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all active recurring expenses, normalized to a monthly amount">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">This Month</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-red-500">
+            <div className="rounded-lg border-l-[3px] border-l-red-500 bg-white p-4 shadow-md" title="Total of all active recurring expenses, normalized to a monthly amount">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">This Month</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 −{formatCurrency(Math.round(totalMonthlyBills))}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">
                 {activeBills.length} active expenses
               </p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md" title="Fixed: housing, insurance, loans, subscriptions, childcare. Variable: everything else.">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Fixed vs Variable</p>
+            <div className="rounded-lg border-l-[3px] border-l-purple-500 bg-white p-4 shadow-md" title="Fixed: housing, insurance, loans, subscriptions, childcare. Variable: everything else.">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Fixed vs Variable</p>
               <div className="mt-2 space-y-1">
                 <div className="flex items-center justify-between text-[12px]">
                   <span className="text-gray-500">Fixed</span>
@@ -133,9 +133,9 @@ function BillsPage() {
                 <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-200" />Variable</span>
               </div>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md" title="Your monthly expenses divided into a weekly average — useful for weekly budgeting">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Weekly Burn</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-gray-900">
+            <div className="rounded-lg border-l-[3px] border-l-amber-500 bg-white p-4 shadow-md" title="Your monthly expenses divided into a weekly average — useful for weekly budgeting">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Weekly Burn</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(Math.round(totalMonthlyBills / (52 / 12)))}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">
