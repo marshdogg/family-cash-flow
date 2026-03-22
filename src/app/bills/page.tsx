@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Plus, Trash2 } from "lucide-react";
 import { AddBillForm } from "@/components/forms/AddBillForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
@@ -23,6 +24,7 @@ const BILL_ICONS: Record<string, { icon: string; bg: string }> = {
 export default function BillsPage() {
   const { bills, totalMonthlyBills, addBill, removeBill, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
 
@@ -83,7 +85,7 @@ export default function BillsPage() {
                       −{formatCurrency(bill.amount)}
                     </div>
                     <button
-                      onClick={() => removeBill(bill.id)}
+                      onClick={() => setDeleteTarget({ id: bill.id, name: bill.name })}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       aria-label={`Delete ${bill.name}`}
                     >
@@ -105,6 +107,15 @@ export default function BillsPage() {
             setShowForm(false);
           }}
           onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={`Delete ${deleteTarget.name}?`}
+          message="This expense will be permanently removed from your cash flow projections."
+          onConfirm={() => { removeBill(deleteTarget.id); setDeleteTarget(null); }}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

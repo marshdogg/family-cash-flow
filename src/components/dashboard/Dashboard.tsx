@@ -140,7 +140,7 @@ export function Dashboard() {
       {/* ── Metrics Strip ── */}
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
-          <p className="text-[12px] font-medium text-gray-400">Cash Position</p>
+          <p className="text-[12px] font-medium text-gray-400">Balance</p>
           <div className="mt-0.5 font-mono text-[36px] font-bold leading-none tracking-tight text-gray-900">
             {formatCurrency(balance)}
           </div>
@@ -217,7 +217,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Two Column: Chart + Activity Feed ── */}
-      <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="mt-4 grid items-start gap-6 lg:grid-cols-[1fr_300px]">
         {/* Left: Chart */}
         <div>
           <ProjectionChart
@@ -253,7 +253,7 @@ export function Dashboard() {
 
         {/* Right: Activity Feed */}
         <div className="space-y-1">
-          <h3 className="mb-2 text-[13px] font-bold text-gray-400">UPCOMING</h3>
+          <h3 className="text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
           {activityFeed.length > 0 ? (
             activityFeed.map((item, i) => (
               <div

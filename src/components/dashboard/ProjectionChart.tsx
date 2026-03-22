@@ -53,8 +53,11 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     const balances = periods.map((p) => p.balance);
     const whatIfBalances = whatIfPeriods?.map((p) => p.balance) ?? [];
     const allVals = [...balances, ...whatIfBalances, threshold];
-    const minVal = Math.min(...allVals) * 0.85;
-    const maxVal = Math.max(...allVals) * 1.1;
+    const rawMin = Math.min(...allVals);
+    const rawMax = Math.max(...allVals);
+    const padding = (rawMax - rawMin) * 0.1 || rawMax * 0.1 || 1000;
+    const minVal = rawMin - padding;
+    const maxVal = rawMax + padding;
     return { balances, whatIfBalances, minVal, maxVal, range: maxVal - minVal || 1 };
   }, [periods, whatIfPeriods, threshold]);
 
@@ -74,25 +77,46 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
 
     const PAD_TOP = 20;
     const PAD_BOTTOM = 30;
-    const PAD_H = 8;
+    const PAD_LEFT = 52;
+    const PAD_RIGHT = 8;
     const plotH = H - PAD_TOP - PAD_BOTTOM;
-    const { balances, minVal, range } = chartData;
+    const { balances, minVal, maxVal, range } = chartData;
     const n = periods.length;
 
     const yScale = (val: number) => PAD_TOP + plotH - ((val - minVal) / range) * plotH;
-    const xScale = (i: number) => PAD_H + (i / (n - 1)) * (width - PAD_H * 2);
+    const xScale = (i: number) => PAD_LEFT + (i / (n - 1)) * (width - PAD_LEFT - PAD_RIGHT);
 
     ctx.clearRect(0, 0, width, H);
 
-    // Gridlines
+    // Format Y-axis label (compact: $1k, $10.5k, $100k)
+    const formatYLabel = (val: number) => {
+      const abs = Math.abs(val);
+      if (abs >= 1000) {
+        const k = val / 1000;
+        return "$" + (Number.isInteger(Math.round(k)) ? Math.round(k) : k.toFixed(1)) + "k";
+      }
+      return "$" + Math.round(val);
+    };
+
+    // Gridlines + Y-axis labels
     ctx.strokeStyle = "#F3F4F6";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const y = PAD_TOP + (plotH / 4) * i;
+      const val = maxVal - (range * i) / 4;
+
+      // Gridline
       ctx.beginPath();
-      ctx.moveTo(PAD_H, y);
-      ctx.lineTo(width - PAD_H, y);
+      ctx.moveTo(PAD_LEFT, y);
+      ctx.lineTo(width - PAD_RIGHT, y);
       ctx.stroke();
+
+      // Y-axis label
+      ctx.font = "600 11px 'Plus Jakarta Sans', system-ui, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#9CA3AF";
+      ctx.fillText(formatYLabel(val), PAD_LEFT - 10, y);
     }
 
     // Threshold line
@@ -102,8 +126,8 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
-    ctx.moveTo(PAD_H, threshY);
-    ctx.lineTo(width - PAD_H, threshY);
+    ctx.moveTo(PAD_LEFT, threshY);
+    ctx.lineTo(width - PAD_RIGHT, threshY);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.restore();
@@ -195,7 +219,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     for (let i = 0; i < n; i += step) {
       ctx.fillText(periods[i].label, xScale(i), H - 8);
     }
-  }, [periods, chartData, threshold, width]);
+  }, [periods, whatIfPeriods, chartData, threshold, width, selectedIndex]);
 
   useEffect(() => {
     render();
@@ -300,9 +324,31 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     }
   }, [onPeriodClick]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!onPeriodClick || periods.length === 0) return;
+    const current = selectedIndex ?? -1;
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = Math.min(current + 1, periods.length - 1);
+      onPeriodClick(next);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = Math.max(current - 1, 0);
+      onPeriodClick(prev);
+    } else if (e.key === "Escape") {
+      onPeriodClick(selectedIndex ?? 0); // toggle off
+    }
+  }, [onPeriodClick, selectedIndex, periods.length]);
+
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  // Build a screen-reader-accessible summary of the chart data
+  const srSummary = periods.length > 0
+    ? `Cash flow projection chart with ${periods.length} periods. Current balance: ${formatCurrency(periods[0].balance)}. Final projected balance: ${formatCurrency(periods[periods.length - 1].balance)}. Use arrow keys to navigate periods.`
+    : "Cash flow projection chart. No data available.";
 
   return (
     <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md">
@@ -331,16 +377,31 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
         </div>
       </div>
 
-      <div ref={wrapRef} className="relative w-full">
+      <div
+        ref={wrapRef}
+        className="relative w-full"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        role="application"
+        aria-label={srSummary}
+        aria-roledescription="interactive chart"
+      >
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={handleClick}
           className="block w-full"
-          role="img"
-          aria-label={`Cash flow projection chart. Current balance: ${formatCurrency(periods[0]?.balance ?? 0)}`}
+          aria-hidden="true"
         />
+        {/* Screen reader live region for selected period */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {selectedIndex != null && periods[selectedIndex] && (() => {
+            const p = periods[selectedIndex];
+            const net = p.income - p.expense - p.invested;
+            return `${p.label}: Balance ${formatCurrency(p.balance)}, Income ${formatCurrency(p.income)}, Expenses ${formatCurrency(p.expense)}, Net ${net >= 0 ? "+" : "−"}${formatCurrency(Math.abs(net))}`;
+          })()}
+        </div>
       </div>
 
       {/* Tooltip */}
@@ -348,6 +409,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
         ref={tooltipRef}
         className="pointer-events-none fixed z-[1000] hidden min-w-[180px] rounded-xl bg-[#1E1B2E] px-4 py-3 text-[12px] text-white shadow-xl"
         style={{ backdropFilter: "blur(8px)" }}
+        role="tooltip"
       />
     </div>
   );

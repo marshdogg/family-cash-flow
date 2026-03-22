@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Plus, Trash2 } from "lucide-react";
 import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
@@ -21,6 +22,7 @@ const INVEST_ICONS: Record<string, { icon: string; bg: string }> = {
 export default function InvestmentsPage() {
   const { investments, totalMonthlyInvestments, addInvestment, removeInvestment, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
 
@@ -103,7 +105,7 @@ export default function InvestmentsPage() {
                       {formatCurrency(inv.amount)}
                     </div>
                     <button
-                      onClick={() => removeInvestment(inv.id)}
+                      onClick={() => setDeleteTarget({ id: inv.id, name: inv.name })}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       aria-label={`Delete ${inv.name}`}
                     >
@@ -125,6 +127,15 @@ export default function InvestmentsPage() {
             setShowForm(false);
           }}
           onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={`Delete ${deleteTarget.name}?`}
+          message="This investment will be permanently removed from your cash flow projections."
+          onConfirm={() => { removeInvestment(deleteTarget.id); setDeleteTarget(null); }}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

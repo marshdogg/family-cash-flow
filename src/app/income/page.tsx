@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Plus, Trash2 } from "lucide-react";
 import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
@@ -20,6 +21,7 @@ const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
 export default function IncomePage() {
   const { income, totalMonthlyIncome, addIncome, removeIncome, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
 
@@ -100,7 +102,7 @@ export default function IncomePage() {
                       )}
                     </div>
                     <button
-                      onClick={() => removeIncome(item.id)}
+                      onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       aria-label={`Delete ${item.name}`}
                     >
@@ -122,6 +124,15 @@ export default function IncomePage() {
             setShowForm(false);
           }}
           onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={`Delete ${deleteTarget.name}?`}
+          message="This income source will be permanently removed from your cash flow projections."
+          onConfirm={() => { removeIncome(deleteTarget.id); setDeleteTarget(null); }}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>
