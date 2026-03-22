@@ -369,9 +369,9 @@ export function Dashboard() {
         {!whatIfOpen && (
           <button
             onClick={() => setWhatIfOpen(true)}
-            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 transition-colors hover:bg-amber-100"
+            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100"
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles className="h-4 w-4" />
             What If
           </button>
         )}
