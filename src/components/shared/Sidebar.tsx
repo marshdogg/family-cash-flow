@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Receipt, Wallet, TrendingUp, CalendarHeart, Settings } from "lucide-react";
+import { Home, Receipt, Wallet, TrendingUp, CalendarHeart, BarChart3, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/investments", label: "Investments", icon: TrendingUp },
   { href: "/plans", label: "Plans & Events", icon: CalendarHeart },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

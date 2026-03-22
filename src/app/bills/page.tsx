@@ -68,7 +68,7 @@ export default function BillsPage() {
           </div>
 
           {/* ── Hero Cards ── */}
-          <div className="mb-5 grid grid-cols-3 gap-3">
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all active recurring expenses, normalized to a monthly amount">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">This Month</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-red-500">

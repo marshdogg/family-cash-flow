@@ -59,7 +59,7 @@ export default function PlansPage() {
             </button>
           </div>
 
-          <div className="mb-5 grid grid-cols-3 gap-3">
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white p-4 shadow-md">
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Planned</p>
               <p className="mt-1 font-mono text-[22px] font-semibold text-purple-500">
@@ -170,7 +170,7 @@ export default function PlansPage() {
                       </button>
                     </div>
                     {/* Progress bar */}
-                    <div className="mt-2 ml-13 flex items-center gap-2">
+                    <div className="mt-2 pl-[52px] flex items-center gap-2">
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
                         <div
                           className="h-full rounded-full bg-green-400 transition-all"

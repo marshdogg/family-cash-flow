@@ -149,7 +149,7 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
                       <button
                         onClick={() => completeStep(0)}
                         disabled={!canCompleteStep(0)}
-                        className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600 disabled:opacity-50"
+                        className="rounded-md bg-purple-500 px-5 py-3 text-[13px] font-bold text-white shadow-md hover:bg-purple-600 disabled:opacity-50"
                       >
                         Continue
                       </button>
@@ -180,7 +180,7 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
                     <div className="mt-4 flex justify-end">
                       <button
                         onClick={() => completeStep(1)}
-                        className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
+                        className="rounded-md bg-purple-500 px-5 py-3 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
                       >
                         Looks Good
                       </button>
@@ -211,7 +211,7 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
                     <div className="mt-4 flex justify-end">
                       <button
                         onClick={() => completeStep(2)}
-                        className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
+                        className="rounded-md bg-purple-500 px-5 py-3 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
                       >
                         Looks Good
                       </button>
@@ -267,13 +267,13 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
                     <div className="mt-5 flex items-center justify-between">
                       <button
                         onClick={onCancel}
-                        className="rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50"
+                        className="rounded-md border border-gray-200 bg-white px-4 py-3 text-[13px] font-semibold text-gray-700 hover:bg-gray-50"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => onComplete(bankBalance)}
-                        className="flex items-center gap-2 rounded-md bg-gradient-primary px-6 py-2.5 text-[13px] font-bold text-white shadow-md hover:shadow-glow"
+                        className="flex items-center gap-2 rounded-md bg-gradient-primary px-6 py-3 text-[13px] font-bold text-white shadow-md hover:shadow-glow"
                       >
                         <Check className="h-4 w-4" />
                         Save Check-In

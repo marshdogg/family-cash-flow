@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Receipt, Wallet, CalendarHeart, TrendingUp, Settings, MoreHorizontal, X } from "lucide-react";
+import { Home, Receipt, Wallet, CalendarHeart, TrendingUp, BarChart3, Settings, MoreHorizontal, X } from "lucide-react";
 
 const PRIMARY_ITEMS = [
   { href: "/", label: "Home", icon: Home },
@@ -14,6 +14,7 @@ const PRIMARY_ITEMS = [
 
 const MORE_ITEMS = [
   { href: "/investments", label: "Investments", icon: TrendingUp },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

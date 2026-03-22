@@ -279,60 +279,20 @@ export function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
       {/* ── Metrics Strip ── */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-6">
-        <div>
-          <p className="text-[12px] font-medium text-gray-400">Balance</p>
-          <div className="mt-0.5 font-mono text-[36px] font-bold leading-none tracking-tight text-gray-900">
-            {formatCurrency(balance)}
-          </div>
-          <p className="mt-1.5 text-[12px] text-gray-400">
-            Last check-in {lastCheckInLabel}
-            {streak > 0 && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
-                <Flame className="h-3 w-3" /> {streak} wk streak
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-6">
+      <div className="border-b border-gray-200 pb-6">
+        <div className="flex items-end justify-between">
           <div>
-            <p className="text-[11px] font-medium text-gray-400">Income</p>
-            <p className="font-mono text-[18px] font-bold text-green-600">
-              +{formatCurrency(displayIncome)}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium text-gray-400">Expenses</p>
-            <p className="font-mono text-[18px] font-bold text-red-500">
-              −{formatCurrency(displayExpenses)}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
-            </p>
-          </div>
-          {displayInvestments > 0 && (
-            <div>
-              <p className="text-[11px] font-medium text-gray-400">Investments</p>
-              <p className="font-mono text-[18px] font-bold text-purple-500">
-                −{formatCurrency(displayInvestments)}
-                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
-              </p>
+            <p className="text-[12px] font-medium text-gray-400">Balance</p>
+            <div className="mt-0.5 font-mono text-[28px] font-bold leading-none tracking-tight text-gray-900 sm:text-[36px]">
+              {formatCurrency(balance)}
             </div>
-          )}
-          {displaySavings > 0 && (
-            <div>
-              <p className="text-[11px] font-medium text-gray-400">Plan Savings</p>
-              <p className="font-mono text-[18px] font-bold text-amber-500">
-                −{formatCurrency(displaySavings)}
-                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
-              </p>
-            </div>
-          )}
-          <div>
-            <p className="text-[11px] font-medium text-gray-400">Free Cash</p>
-            <p className={`font-mono text-[18px] font-bold ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
-              {formatCurrency(Math.abs(displayAvailable))}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+            <p className="mt-1.5 text-[12px] text-gray-400">
+              Last check-in {lastCheckInLabel}
+              {streak > 0 && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
+                  <Flame className="h-3 w-3" /> {streak} wk streak
+                </span>
+              )}
             </p>
           </div>
 
@@ -343,6 +303,48 @@ export function Dashboard() {
             <ClipboardCheck className="h-4 w-4" />
             Check-In
           </Link>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-6">
+          <div>
+            <p className="text-[11px] font-medium text-gray-400">Income</p>
+            <p className="font-mono text-[16px] font-bold text-green-600 sm:text-[18px]">
+              +{formatCurrency(displayIncome)}
+              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-gray-400">Expenses</p>
+            <p className="font-mono text-[16px] font-bold text-red-500 sm:text-[18px]">
+              −{formatCurrency(displayExpenses)}
+              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+            </p>
+          </div>
+          {displayInvestments > 0 && (
+            <div>
+              <p className="text-[11px] font-medium text-gray-400">Investments</p>
+              <p className="font-mono text-[16px] font-bold text-purple-500 sm:text-[18px]">
+                −{formatCurrency(displayInvestments)}
+                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              </p>
+            </div>
+          )}
+          {displaySavings > 0 && (
+            <div>
+              <p className="text-[11px] font-medium text-gray-400">Plan Savings</p>
+              <p className="font-mono text-[16px] font-bold text-amber-500 sm:text-[18px]">
+                −{formatCurrency(displaySavings)}
+                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              </p>
+            </div>
+          )}
+          <div>
+            <p className="text-[11px] font-medium text-gray-400">Free Cash</p>
+            <p className={`font-mono text-[16px] font-bold sm:text-[18px] ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
+              {formatCurrency(Math.abs(displayAvailable))}
+              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -376,7 +378,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Two Column: Chart + Activity Feed ── */}
-      <div className="mt-4 grid items-start gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="mt-4 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_300px]">
         {/* Left: Chart */}
         <div>
           <ProjectionChart
