@@ -56,9 +56,14 @@ export default function IncomePage() {
 
   // Top income categories for subtitle
   const topCategories = useMemo(() => {
-    const cats = new Set(recurring.map((i) => i.category));
     const labels: Record<string, string> = { paycheck: "Salary", bonus: "Bonus", side: "Freelance", benefits: "Benefits", refund: "Refund", other: "Other" };
-    return [...cats].slice(0, 3).map((c) => labels[c] ?? c).join(", ");
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const i of recurring) {
+      if (!seen.has(i.category)) { seen.add(i.category); unique.push(i.category); }
+      if (unique.length >= 3) break;
+    }
+    return unique.map((c) => labels[c] ?? c).join(", ");
   }, [recurring]);
 
   // Next one-time income
