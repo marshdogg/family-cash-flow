@@ -1,19 +1,27 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BalanceHero } from "./BalanceHero";
 import { ProjectionChart } from "./ProjectionChart";
 import { UpcomingBills } from "./UpcomingBills";
 import { QuickActions } from "./QuickActions";
 import { useStore } from "@/hooks/useStore";
+import { buildProjection, projectionTitle } from "@/lib/projection";
+import type { ViewMode } from "@/lib/projection";
+
+const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
+  { value: "weekly", label: "W" },
+  { value: "biweekly", label: "2W" },
+  { value: "monthly", label: "M" },
+];
 
 export function Dashboard() {
-  const { bills, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, loaded } = useStore();
+  const { bills, income, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useStore();
+  const [viewMode, setViewMode] = useState<ViewMode>("weekly");
 
   const balance = latestCheckIn?.bankBalance ?? 0;
-  const weeklyExpenses = totalMonthlyBills / 4.33;
-  const weeklyIncome = totalMonthlyIncome / 4.33;
-  const weeklyNet = weeklyIncome - weeklyExpenses;
+  const weeklyExpenses = totalMonthlyBills / (52 / 12);
+  const weeklyIncome = totalMonthlyIncome / (52 / 12);
 
   const lastCheckInLabel = useMemo(() => {
     if (!latestCheckIn) return "Never";
@@ -23,22 +31,10 @@ export function Dashboard() {
     return `${days} days ago`;
   }, [latestCheckIn]);
 
-  // Build 12-week projection from current balance
-  const periods = useMemo(() => {
-    let running = balance;
-    const today = new Date();
-    return Array.from({ length: 12 }, (_, i) => {
-      const weekStart = new Date(today);
-      weekStart.setDate(today.getDate() + i * 7);
-      running += weeklyNet;
-      return {
-        label: weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        income: Math.round(weeklyIncome),
-        expense: Math.round(weeklyExpenses),
-        balance: Math.round(running),
-      };
-    });
-  }, [balance, weeklyNet, weeklyIncome, weeklyExpenses]);
+  const periods = useMemo(
+    () => buildProjection(balance, bills, income, viewMode),
+    [balance, bills, income, viewMode]
+  );
 
   // Upcoming bills (next 14 days)
   const upcomingBills = useMemo(() => {
@@ -71,12 +67,28 @@ export function Dashboard() {
 
       <QuickActions />
 
-      {periods.length > 0 && (
-        <div className="mt-6">
-          <h2 className="mb-3 text-[15px] font-bold text-gray-900">12-Week Projection</h2>
-          <ProjectionChart periods={periods} threshold={500} />
+      <div className="mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[15px] font-bold text-gray-900">{projectionTitle(viewMode)}</h2>
+          <div className="flex gap-0.5 rounded-lg bg-gray-100 p-[3px]">
+            {VIEW_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setViewMode(opt.value)}
+                className={`rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors ${
+                  viewMode === opt.value
+                    ? "bg-white text-purple-600 shadow-sm"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+                title={opt.value === "weekly" ? "Weekly" : opt.value === "biweekly" ? "Biweekly" : "Monthly"}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
+        <ProjectionChart periods={periods} threshold={settings.threshold} />
+      </div>
 
       {upcomingBills.length > 0 && (
         <div className="mt-6">
