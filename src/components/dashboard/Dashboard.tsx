@@ -423,7 +423,7 @@ export function Dashboard() {
       </div>
 
       {/* ── Two Column: Chart + Activity Feed ── */}
-      <div className="mt-4 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="mt-4 grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_300px]">
         {/* Left: Chart */}
         <div>
           <ProjectionChart
@@ -474,7 +474,7 @@ export function Dashboard() {
         </div>
 
         {/* Right: Activity Feed */}
-        <div className="overflow-hidden rounded-lg bg-white shadow-md">
+        <div className="min-w-0 overflow-hidden rounded-lg bg-white shadow-md">
           {activityFeed.length > 0 ? (
             <div>
               <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING TRANSACTIONS</h3>
@@ -496,7 +496,7 @@ export function Dashboard() {
                     if (bill) setEditBill(bill);
                   }
                 }}
-                className="flex w-full items-center gap-3 border-b border-gray-100 px-3.5 py-3 text-left last:border-b-0 transition-colors hover:bg-gray-50"
+                className="flex w-full min-w-0 items-center gap-3 border-b border-gray-100 px-3.5 py-3 text-left last:border-b-0 transition-colors hover:bg-gray-50"
               >
                 <div
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-[13px]"
@@ -505,10 +505,10 @@ export function Dashboard() {
                   {item.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[12px] font-semibold text-gray-900">{item.name}</div>
+                  <div className="truncate text-[12px] font-semibold text-gray-900">{item.name}</div>
                   <div className="text-[11px] text-gray-400">{item.dateLabel}</div>
                 </div>
-                <div className="text-right">
+                <div className="flex-shrink-0 text-right">
                   {item.type === "event" ? (
                     <div>
                       <div className="font-mono text-[12px] font-bold text-amber-600">
