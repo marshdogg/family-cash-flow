@@ -35,7 +35,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
   const hitAreasRef = useRef<HitArea[]>([]);
   const rafRef = useRef(0);
   const [width, setWidth] = useState(0);
-  const H = 220;
+  const H = 340;
 
   useEffect(() => {
     const el = wrapRef.current;
