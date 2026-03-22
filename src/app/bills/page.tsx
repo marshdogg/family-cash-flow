@@ -158,39 +158,52 @@ function BillsPage() {
                 </button>
               </div>
             ) : (
-              bills.map((bill) => {
-                const config = BILL_ICONS[bill.category] ?? BILL_ICONS.other;
-                return (
-                  <div
-                    key={bill.id}
-                    onClick={() => { setEditTarget(bill); setShowForm(true); }}
-                    className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
-                  >
-                    <div
-                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
-                      style={{ background: config.bg }}
-                    >
-                      {config.icon}
+              <>
+                {/* Fixed expenses */}
+                {activeBills.filter((b) => FIXED_CATEGORIES.has(b.category)).length > 0 && (
+                  <>
+                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Fixed
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-semibold text-gray-900">{bill.name}</div>
-                      <div className="mt-0.5 text-[11px] text-gray-400">
-                        {bill.frequency} · Next: {new Date(bill.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </div>
+                    {activeBills.filter((b) => FIXED_CATEGORIES.has(b.category)).map((bill) => {
+                      const config = BILL_ICONS[bill.category] ?? BILL_ICONS.other;
+                      return (
+                        <BillRow key={bill.id} bill={bill} config={config} onEdit={() => { setEditTarget(bill); setShowForm(true); }} onDelete={() => setDeleteTarget({ id: bill.id, name: bill.name })} />
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Variable expenses */}
+                {activeBills.filter((b) => !FIXED_CATEGORIES.has(b.category)).length > 0 && (
+                  <>
+                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Variable
                     </div>
-                    <div className="flex-shrink-0 font-mono text-[14px] font-semibold text-gray-900">
-                      −{formatCurrency(bill.amount)}
+                    {activeBills.filter((b) => !FIXED_CATEGORIES.has(b.category)).map((bill) => {
+                      const config = BILL_ICONS[bill.category] ?? BILL_ICONS.other;
+                      return (
+                        <BillRow key={bill.id} bill={bill} config={config} onEdit={() => { setEditTarget(bill); setShowForm(true); }} onDelete={() => setDeleteTarget({ id: bill.id, name: bill.name })} />
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Inactive/paused expenses */}
+                {bills.filter((b) => b.status !== "active").length > 0 && (
+                  <>
+                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Inactive
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: bill.id, name: bill.name }); }}
-                      className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                      aria-label={`Delete ${bill.name}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                );
-              })
+                    {bills.filter((b) => b.status !== "active").map((bill) => {
+                      const config = BILL_ICONS[bill.category] ?? BILL_ICONS.other;
+                      return (
+                        <BillRow key={bill.id} bill={bill} config={config} onEdit={() => { setEditTarget(bill); setShowForm(true); }} onDelete={() => setDeleteTarget({ id: bill.id, name: bill.name })} />
+                      );
+                    })}
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -221,6 +234,38 @@ function BillsPage() {
           onCancel={() => setDeleteTarget(null)}
         />
       )}
+    </div>
+  );
+}
+
+function BillRow({ bill, config, onEdit, onDelete }: { bill: Bill; config: { icon: string; bg: string }; onEdit: () => void; onDelete: () => void }) {
+  return (
+    <div
+      onClick={onEdit}
+      className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+    >
+      <div
+        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
+        style={{ background: config.bg }}
+      >
+        {config.icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[13px] font-semibold text-gray-900">{bill.name}</div>
+        <div className="mt-0.5 text-[11px] text-gray-400">
+          {bill.frequency} · Next: {new Date(bill.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+        </div>
+      </div>
+      <div className="flex-shrink-0 font-mono text-[14px] font-semibold text-gray-900">
+        −{formatCurrency(bill.amount)}
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+        aria-label={`Delete ${bill.name}`}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
