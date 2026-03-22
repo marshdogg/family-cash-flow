@@ -17,7 +17,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Runaway — Family Finance Planner",
+  title: "Runway — Family Finance Planner",
   description: "See where your money is going and whether you'll make it to next payday.",
 };
 

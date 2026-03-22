@@ -22,7 +22,7 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-primary">
           <span className="text-xs font-extrabold text-white">R</span>
         </div>
-        <span className="text-[15px] font-bold text-gray-900">Runaway</span>
+        <span className="text-[15px] font-bold text-gray-900">Runway</span>
       </div>
 
       <ul className="mt-2 space-y-1 px-3">
