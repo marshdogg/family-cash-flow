@@ -330,7 +330,7 @@ export function Dashboard() {
           )}
           <div>
             <p className="text-[11px] font-medium text-gray-400">Free Cash</p>
-            <p className={`font-mono text-[18px] font-bold ${displayAvailable >= 0 ? "text-purple-600" : "text-red-500"}`}>
+            <p className={`font-mono text-[18px] font-bold ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
               {formatCurrency(Math.abs(displayAvailable))}
               <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
             </p>
@@ -367,7 +367,7 @@ export function Dashboard() {
         {!whatIfOpen && (
           <button
             onClick={() => setWhatIfOpen(true)}
-            className="flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-[12px] font-bold text-amber-700 transition-colors hover:bg-amber-100"
+            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 transition-colors hover:bg-amber-100"
           >
             <Sparkles className="h-3.5 w-3.5" />
             What If
