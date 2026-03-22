@@ -148,7 +148,9 @@ export default function PlansPage() {
                           {formatCurrency(event.amount)}
                         </div>
                         <div className="mt-0.5 text-[11px] text-gray-400">
-                          {formatCurrency(Math.round(monthlyNeeded))}/mo needed
+                          {event.contributionAmount != null
+                            ? `${formatCurrency(event.contributionAmount)}/${event.contributionFrequency === "weekly" ? "wk" : event.contributionFrequency === "biweekly" ? "2wk" : event.contributionFrequency === "monthly" ? "mo" : event.contributionFrequency === "quarterly" ? "qtr" : "yr"}`
+                            : `${formatCurrency(Math.round(monthlyNeeded))}/mo needed`}
                         </div>
                       </div>
                       <button
@@ -182,7 +184,7 @@ export default function PlansPage() {
 
       {showForm && (
         <AddPlanForm
-          initialData={editTarget ? { name: editTarget.name, category: editTarget.category, amount: editTarget.amount, savedSoFar: editTarget.savedSoFar, targetDate: editTarget.targetDate } : undefined}
+          initialData={editTarget ? { name: editTarget.name, category: editTarget.category, amount: editTarget.amount, savedSoFar: editTarget.savedSoFar, targetDate: editTarget.targetDate, contributionAmount: editTarget.contributionAmount, contributionFrequency: editTarget.contributionFrequency } : undefined}
           onSubmit={(data) => {
             if (editTarget) {
               updatePlannedEvent(editTarget.id, data);

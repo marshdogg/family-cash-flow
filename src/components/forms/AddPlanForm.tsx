@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import type { PlannedEventCategory } from "@/lib/types";
+import type { PlannedEventCategory, Frequency } from "@/lib/types";
 
 const CATEGORIES: { value: PlannedEventCategory; label: string; icon: string }[] = [
   { value: "trip", label: "Trip", icon: "\u2708\uFE0F" },
@@ -16,7 +16,24 @@ const CATEGORIES: { value: PlannedEventCategory; label: string; icon: string }[]
   { value: "other", label: "Other", icon: "\uD83D\uDCCB" },
 ];
 
-interface PlanData { name: string; category: PlannedEventCategory; amount: number; savedSoFar: number; targetDate: string }
+const CONTRIB_FREQUENCIES: { value: Frequency; label: string }[] = [
+  { value: "weekly", label: "Weekly" },
+  { value: "biweekly", label: "Biweekly" },
+  { value: "semimonthly", label: "Semi-monthly" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "annually", label: "Annually" },
+];
+
+interface PlanData {
+  name: string;
+  category: PlannedEventCategory;
+  amount: number;
+  savedSoFar: number;
+  targetDate: string;
+  contributionAmount: number | null;
+  contributionFrequency: Frequency | null;
+}
 
 interface AddPlanFormProps {
   onSubmit: (data: PlanData) => void;
@@ -31,6 +48,9 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
   const [amount, setAmount] = useState(initialData ? String(initialData.amount) : "");
   const [savedSoFar, setSavedSoFar] = useState(initialData ? String(initialData.savedSoFar) : "");
   const [targetDate, setTargetDate] = useState(initialData?.targetDate ?? "");
+  const [hasContribution, setHasContribution] = useState(initialData?.contributionAmount != null);
+  const [contribAmount, setContribAmount] = useState(initialData?.contributionAmount ? String(initialData.contributionAmount) : "");
+  const [contribFrequency, setContribFrequency] = useState<Frequency>(initialData?.contributionFrequency ?? "monthly");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const trapRef = useFocusTrap();
@@ -44,11 +64,26 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
     const saved = savedSoFar ? parseFloat(savedSoFar) : 0;
     if (isNaN(saved) || saved < 0) newErrors.savedSoFar = "Enter a valid amount";
     if (!targetDate) newErrors.targetDate = "Target date is required";
+
+    let contribNum: number | null = null;
+    if (hasContribution) {
+      contribNum = parseFloat(contribAmount);
+      if (isNaN(contribNum) || contribNum <= 0) newErrors.contribAmount = "Enter a valid contribution amount";
+    }
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     setSaving(true);
-    onSubmit({ name: name.trim(), category, amount: num, savedSoFar: saved, targetDate });
+    onSubmit({
+      name: name.trim(),
+      category,
+      amount: num,
+      savedSoFar: saved,
+      targetDate,
+      contributionAmount: hasContribution ? contribNum : null,
+      contributionFrequency: hasContribution ? contribFrequency : null,
+    });
   };
 
   return (
@@ -63,7 +98,7 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 px-5 py-5">
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-5">
             <div>
               <label htmlFor="plan-name" className="text-[12px] font-semibold text-gray-500">Name</label>
               <input
@@ -154,6 +189,64 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
                 aria-invalid={!!errors.targetDate}
               />
               {errors.targetDate && <p className="mt-1 text-[11px] text-red-500">{errors.targetDate}</p>}
+            </div>
+
+            {/* Recurring contribution toggle */}
+            <div className="rounded-lg border border-gray-200 p-4">
+              <label htmlFor="plan-contrib-toggle" className="flex cursor-pointer items-center gap-3">
+                <button
+                  id="plan-contrib-toggle"
+                  type="button"
+                  role="switch"
+                  aria-checked={hasContribution}
+                  onClick={() => setHasContribution(!hasContribution)}
+                  className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${hasContribution ? "bg-purple-500" : "bg-gray-200"}`}
+                >
+                  <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${hasContribution ? "left-6" : "left-1"}`} />
+                </button>
+                <div>
+                  <span className="text-[13px] font-semibold text-gray-700">Set up recurring savings</span>
+                  <p className="mt-0.5 text-[11px] text-gray-400">Automatically factor a regular contribution into your projection</p>
+                </div>
+              </label>
+
+              {hasContribution && (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="plan-contrib-amount" className="text-[12px] font-semibold text-gray-500">Contribution Amount</label>
+                    <div className="mt-1 flex rounded-sm border border-gray-200 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20">
+                      <span className="border-r border-gray-200 bg-gray-50 px-2.5 py-2.5 font-mono text-[13px] text-gray-400" aria-hidden="true">$</span>
+                      <input
+                        id="plan-contrib-amount"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={contribAmount}
+                        onChange={(e) => setContribAmount(e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        placeholder="0.00"
+                        className="flex-1 border-none px-3 py-2.5 text-[14px] outline-none"
+                        aria-invalid={!!errors.contribAmount}
+                        aria-describedby={errors.contribAmount ? "plan-contrib-error" : undefined}
+                      />
+                    </div>
+                    {errors.contribAmount && <p id="plan-contrib-error" className="mt-1 text-[11px] text-red-500">{errors.contribAmount}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="plan-contrib-freq" className="text-[12px] font-semibold text-gray-500">Frequency</label>
+                    <select
+                      id="plan-contrib-freq"
+                      value={contribFrequency}
+                      onChange={(e) => setContribFrequency(e.target.value as Frequency)}
+                      className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                    >
+                      {CONTRIB_FREQUENCIES.map((f) => (
+                        <option key={f.value} value={f.value}>{f.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -43,6 +43,8 @@ export interface PlannedEvent {
   amount: number;
   targetDate: string;
   savedSoFar: number;
+  contributionAmount: number | null;
+  contributionFrequency: Frequency | null;
   status: "saving" | "funded" | "spent";
 }
 

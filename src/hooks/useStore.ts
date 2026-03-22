@@ -51,6 +51,8 @@ export function useStore() {
           amount: Number(r.amount),
           targetDate: r.target_date as string,
           savedSoFar: Number(r.saved_so_far),
+          contributionAmount: r.contribution_amount != null ? Number(r.contribution_amount) : null,
+          contributionFrequency: (r.contribution_frequency as PlannedEvent["contributionFrequency"]) ?? null,
           status: r.status as PlannedEvent["status"],
         })));
       }
@@ -165,6 +167,8 @@ export function useStore() {
         amount: event.amount,
         target_date: event.targetDate,
         saved_so_far: event.savedSoFar,
+        contribution_amount: event.contributionAmount,
+        contribution_frequency: event.contributionFrequency,
         status: event.savedSoFar >= event.amount ? "funded" : "saving",
       })
       .select()
@@ -178,6 +182,8 @@ export function useStore() {
         amount: Number(data.amount),
         targetDate: data.target_date,
         savedSoFar: Number(data.saved_so_far),
+        contributionAmount: data.contribution_amount != null ? Number(data.contribution_amount) : null,
+        contributionFrequency: (data.contribution_frequency as PlannedEvent["contributionFrequency"]) ?? null,
         status: data.status,
       }]);
     }
@@ -192,13 +198,19 @@ export function useStore() {
     const status = event.savedSoFar >= event.amount ? "funded" : "saving";
     const { data } = await supabase.from("planned_events").update({
       name: event.name, category: event.category, amount: event.amount,
-      target_date: event.targetDate, saved_so_far: event.savedSoFar, status,
+      target_date: event.targetDate, saved_so_far: event.savedSoFar,
+      contribution_amount: event.contributionAmount,
+      contribution_frequency: event.contributionFrequency,
+      status,
     }).eq("id", id).select().single();
     if (data) {
       setPlannedEvents((prev) => prev.map((e) => e.id === id ? {
         id: data.id, name: data.name, category: data.category,
         amount: Number(data.amount), targetDate: data.target_date,
-        savedSoFar: Number(data.saved_so_far), status: data.status,
+        savedSoFar: Number(data.saved_so_far),
+        contributionAmount: data.contribution_amount != null ? Number(data.contribution_amount) : null,
+        contributionFrequency: (data.contribution_frequency as PlannedEvent["contributionFrequency"]) ?? null,
+        status: data.status,
       } : e));
     }
   }, []);
@@ -278,9 +290,13 @@ export function useStore() {
     .reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0);
 
   // Monthly savings needed for all planned events
+  // Uses explicit contribution if set, otherwise back-calculates from remaining / months left
   const totalMonthlySavingsNeeded = plannedEvents
     .filter((e) => e.status === "saving")
     .reduce((sum, e) => {
+      if (e.contributionAmount != null && e.contributionFrequency != null) {
+        return sum + toMonthly(e.contributionAmount, e.contributionFrequency);
+      }
       const remaining = e.amount - e.savedSoFar;
       const monthsLeft = Math.max(1, Math.ceil(
         (new Date(e.targetDate + "T00:00:00").getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
