@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
-import { Sparkles, Flame, ClipboardCheck, Check, ArrowRight } from "lucide-react";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { Sparkles, Flame, ClipboardCheck, Check } from "lucide-react";
 import Link from "next/link";
 import { ProjectionChart } from "./ProjectionChart";
 import { PeriodDetail } from "./PeriodDetail";
@@ -35,7 +35,29 @@ const EVENT_ICONS: Record<string, string> = {
 };
 
 export function Dashboard() {
-  const { bills, income, investments, plannedEvents, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, totalMonthlyInvestments, totalMonthlySavingsNeeded, monthlyAvailableToSpend, checkIns, settings, loaded } = useSharedStore();
+  const store = useSharedStore();
+  const [previewEmpty, setPreviewEmpty] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("preview")) {
+      setPreviewEmpty(true);
+    }
+  }, []);
+
+  const { bills: realBills, income: realIncome, investments: realInvestments, plannedEvents: realPlannedEvents, latestCheckIn: realLatestCheckIn, totalMonthlyBills: realTotalMonthlyBills, totalMonthlyIncome: realTotalMonthlyIncome, totalMonthlyInvestments: realTotalMonthlyInvestments, totalMonthlySavingsNeeded: realTotalMonthlySavingsNeeded, monthlyAvailableToSpend: realMonthlyAvailableToSpend, checkIns: realCheckIns, settings, loaded } = store;
+
+  const bills = previewEmpty ? [] : realBills;
+  const income = previewEmpty ? [] : realIncome;
+  const investments = previewEmpty ? [] : realInvestments;
+  const plannedEvents = previewEmpty ? [] : realPlannedEvents;
+  const latestCheckIn = previewEmpty ? null : realLatestCheckIn;
+  const totalMonthlyBills = previewEmpty ? 0 : realTotalMonthlyBills;
+  const totalMonthlyIncome = previewEmpty ? 0 : realTotalMonthlyIncome;
+  const totalMonthlyInvestments = previewEmpty ? 0 : realTotalMonthlyInvestments;
+  const totalMonthlySavingsNeeded = previewEmpty ? 0 : realTotalMonthlySavingsNeeded;
+  const monthlyAvailableToSpend = previewEmpty ? 0 : realMonthlyAvailableToSpend;
+  const checkIns = previewEmpty ? [] : realCheckIns;
+
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
@@ -136,6 +158,123 @@ export function Dashboard() {
   const streak = checkIns.length;
 
   if (!loaded) return null;
+
+  // ── Full-page onboarding for first-time users ──
+  const hasIncome = income.length > 0;
+  const hasExpenses = bills.length > 0;
+  const hasPlans = plannedEvents.length > 0;
+  const hasCheckIn = !!latestCheckIn;
+  const isNewUser = !hasIncome || !hasExpenses || !hasPlans || !hasCheckIn;
+
+  if (isNewUser) {
+    const setupSteps = [
+      {
+        num: 1,
+        done: hasIncome,
+        title: "Add your income",
+        description: "Paychecks, side hustles, benefits — anything that puts money in your account.",
+        icon: "💰",
+        href: "/income",
+      },
+      {
+        num: 2,
+        done: hasExpenses,
+        title: "Add your expenses",
+        description: "Rent, utilities, groceries, subscriptions — your recurring costs.",
+        icon: "📋",
+        href: "/bills",
+      },
+      {
+        num: 3,
+        done: hasPlans,
+        title: "Add a plan or event",
+        description: "Upcoming trips, tuition, big purchases — things you're saving toward.",
+        icon: "📅",
+        href: "/plans",
+      },
+      {
+        num: 4,
+        done: hasCheckIn,
+        title: "Complete your first check-in",
+        description: "Enter your current bank balance and Runway will project your cash flow forward.",
+        icon: "📊",
+        href: "/check-in",
+      },
+    ];
+
+    // Find the first incomplete step so we can highlight it
+    const nextStepNum = setupSteps.find((s) => !s.done)?.num ?? 0;
+
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
+        <div className="w-full max-w-xl text-center">
+          <h1 className="text-[26px] font-bold text-gray-900">Not sure where your money goes?</h1>
+          <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-gray-500">
+            Let&apos;s find out together. A few quick steps and you&apos;ll have a clear picture of your cash flow. No judgment, just clarity.
+          </p>
+
+          {/* Step tiles */}
+          <div className="mt-8 space-y-3">
+            {setupSteps.map((step) => {
+              const isNext = step.num === nextStepNum;
+
+              if (step.done) {
+                return (
+                  <div
+                    key={step.num}
+                    className="flex items-center gap-4 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-left"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-green-100">
+                      <Check className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[14px] font-semibold text-green-700 line-through">{step.title}</div>
+                      <div className="mt-0.5 text-[12px] text-green-500">Done</div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={step.num}
+                  href={step.href}
+                  className={`group flex items-center gap-4 rounded-xl border px-5 text-left transition-colors ${
+                    isNext
+                      ? "border-purple-200 bg-white py-5 shadow-md hover:border-purple-300"
+                      : "border-gray-100 bg-gray-50 py-4 opacity-60"
+                  }`}
+                >
+                  <div className={`flex flex-shrink-0 items-center justify-center rounded-lg text-[18px] ${
+                    isNext ? "h-12 w-12 bg-purple-50" : "h-10 w-10 bg-gray-100"
+                  }`}>
+                    {step.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className={`font-semibold ${isNext ? "text-[15px] text-gray-900" : "text-[14px] text-gray-500"}`}>
+                      {step.title}
+                    </div>
+                    {isNext && (
+                      <div className="mt-0.5 text-[12px] text-gray-400">{step.description}</div>
+                    )}
+                  </div>
+                  {isNext && (
+                    <span className="rounded-md bg-purple-500 px-4 py-2 text-[12px] font-bold text-white shadow-sm transition-colors group-hover:bg-purple-600">
+                      Start
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          <p className="mt-8 text-[11px] text-gray-300">
+            Investments are optional — add them anytime from the sidebar.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
@@ -322,92 +461,6 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* ── Setup Checklist (first-time users) ── */}
-      {(() => {
-        const hasIncome = income.length > 0;
-        const hasExpenses = bills.length > 0;
-        const hasCheckIn = !!latestCheckIn;
-        const stepsComplete = [hasIncome, hasExpenses, hasCheckIn].filter(Boolean).length;
-        const allDone = stepsComplete === 3;
-
-        if (allDone) return null;
-
-        const steps = [
-          {
-            done: hasIncome,
-            title: "Add your income",
-            description: "Paychecks, side income, and other sources",
-            href: "/income",
-          },
-          {
-            done: hasExpenses,
-            title: "Add your expenses",
-            description: "Rent, utilities, subscriptions, groceries",
-            href: "/bills",
-          },
-          {
-            done: hasCheckIn,
-            title: "Complete your first check-in",
-            description: "Enter your bank balance to see your projection",
-            href: "/check-in",
-          },
-        ];
-
-        return (
-          <div className="mt-6 rounded-xl border border-purple-200 bg-white p-5 shadow-md">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-[15px] font-bold text-gray-900">Get started with Runway</h3>
-                <p className="mt-0.5 text-[12px] text-gray-400">
-                  {stepsComplete} of 3 complete — add your data to unlock your cash flow projection
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50 font-mono text-[13px] font-bold text-purple-500">
-                {stepsComplete}/3
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-100">
-              <div
-                className="h-full rounded-full bg-purple-500 transition-all"
-                style={{ width: `${(stepsComplete / 3) * 100}%` }}
-              />
-            </div>
-
-            <div className="mt-4 space-y-2">
-              {steps.map((step, i) => (
-                <Link
-                  key={i}
-                  href={step.href}
-                  className={`flex items-center gap-3 rounded-lg px-3.5 py-3 transition-colors ${
-                    step.done
-                      ? "bg-green-50"
-                      : "bg-gray-50 hover:bg-purple-50"
-                  }`}
-                >
-                  <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
-                    step.done
-                      ? "bg-green-500 text-white"
-                      : "border-2 border-gray-300 text-gray-300"
-                  }`}>
-                    {step.done ? <Check className="h-3.5 w-3.5" /> : <span className="text-[11px] font-bold">{i + 1}</span>}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className={`text-[13px] font-semibold ${step.done ? "text-green-700 line-through" : "text-gray-900"}`}>
-                      {step.title}
-                    </div>
-                    <div className={`mt-0.5 text-[11px] ${step.done ? "text-green-500" : "text-gray-400"}`}>
-                      {step.done ? "Done" : step.description}
-                    </div>
-                  </div>
-                  {!step.done && <ArrowRight className="h-4 w-4 text-gray-300" />}
-                </Link>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ClipboardCheck } from "lucide-react";
+import { SetupBanner } from "@/components/shared/SetupBanner";
 import { CheckInWizard } from "@/components/check-in/CheckInWizard";
 import { useSharedStore } from "@/hooks/StoreProvider";
 
@@ -20,6 +21,7 @@ export default function CheckInPage() {
       <Sidebar />
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8">
+          <SetupBanner currentStep="check-in" />
           {!started ? (
             <div className="flex flex-col items-center rounded-xl bg-white px-8 py-16 text-center shadow-md">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-purple-100">

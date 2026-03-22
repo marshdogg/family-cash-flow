@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { SetupBanner } from "@/components/shared/SetupBanner";
 import { Plus, Trash2 } from "lucide-react";
 import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
@@ -36,6 +37,7 @@ export default function IncomePage() {
       <Sidebar />
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
+          <SetupBanner currentStep="income" />
           <div className="mb-5 flex items-center justify-between">
             <h1 className="text-[24px] font-bold text-gray-900">Income</h1>
             <button
