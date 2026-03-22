@@ -23,6 +23,7 @@ interface ProjectionChartProps {
   whatIfPeriods?: Period[];
   threshold: number;
   onPeriodClick?: (index: number) => void;
+  onEventClick?: () => void;
   selectedIndex?: number | null;
 }
 
@@ -35,11 +36,12 @@ interface HitArea {
   index: number;
 }
 
-export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodClick, selectedIndex }: ProjectionChartProps) {
+export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodClick, onEventClick, selectedIndex }: ProjectionChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const hitAreasRef = useRef<HitArea[]>([]);
+  const eventHitAreasRef = useRef<{ x: number; y: number; w: number; h: number }[]>([]);
   const rafRef = useRef(0);
   const [width, setWidth] = useState(0);
   const H = 340;
@@ -219,6 +221,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     hitAreasRef.current = hitAreas;
 
     // Planned event markers
+    const eventAreas: { x: number; y: number; w: number; h: number }[] = [];
     periods.forEach((p, i) => {
       const events = p.plannedEventItems;
       if (!events || events.length === 0) return;
@@ -259,7 +262,11 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, pillX + pillW / 2, pillY + pillH / 2);
+
+      // Store hit area for click detection
+      eventAreas.push({ x: pillX, y: pillY, w: pillW, h: pillH });
     });
+    eventHitAreasRef.current = eventAreas;
 
     // X-axis labels
     ctx.font = "500 10px 'Plus Jakarta Sans', system-ui, sans-serif";
@@ -297,6 +304,15 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
         if (dist < area.radius && dist < closestDist) {
           closest = area;
           closestDist = dist;
+        }
+      }
+
+      // Check if hovering an event marker pill
+      for (const area of eventHitAreasRef.current) {
+        if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
+          canvas.style.cursor = "pointer";
+          tooltip.style.display = "none";
+          return;
         }
       }
 
@@ -343,6 +359,18 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
         html += divider;
         html += row("Net", (net >= 0 ? '+' : '−') + formatCurrency(Math.abs(net)), net >= 0 ? '#86EFAC' : '#FCA5A5');
 
+        // Planned events in this period
+        if (p.plannedEventItems && p.plannedEventItems.length > 0) {
+          html += divider;
+          html += `<div style="font-weight:700;font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Planned Events</div>`;
+          for (const ev of p.plannedEventItems) {
+            html += `<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:4px;">
+              <span style="color:rgba(255,255,255,0.8);">${ev.icon} ${ev.name}</span>
+              <span style="${mono}color:#FCD34D;">${formatCurrency(ev.amount)}</span>
+            </div>`;
+          }
+        }
+
         tooltip.innerHTML = html;
       } else {
         tooltip.style.display = "none";
@@ -358,13 +386,22 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
   }, []);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!onPeriodClick) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
 
+    // Check event marker pills first
+    for (const area of eventHitAreasRef.current) {
+      if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
+        onEventClick?.();
+        return;
+      }
+    }
+
+    // Then check data point hit areas
+    if (!onPeriodClick) return;
     for (const area of hitAreasRef.current) {
       const dist = Math.sqrt((mx - area.x) ** 2 + (my - area.y) ** 2);
       if (dist < area.radius) {
@@ -372,7 +409,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
         return;
       }
     }
-  }, [onPeriodClick]);
+  }, [onPeriodClick, onEventClick]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!onPeriodClick || periods.length === 0) return;

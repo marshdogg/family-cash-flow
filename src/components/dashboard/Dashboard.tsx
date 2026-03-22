@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { Sparkles, Flame, ClipboardCheck, Check } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ProjectionChart } from "./ProjectionChart";
 import { PeriodDetail } from "./PeriodDetail";
 import { WhatIfPanel } from "./WhatIfPanel";
@@ -35,6 +36,7 @@ const EVENT_ICONS: Record<string, string> = {
 };
 
 export function Dashboard() {
+  const router = useRouter();
   const store = useSharedStore();
   const [previewEmpty, setPreviewEmpty] = useState(false);
 
@@ -128,6 +130,7 @@ export function Dashboard() {
       .filter((b) => b.status === "active" && new Date(b.nextDate + "T00:00:00").getTime() <= billCutoff)
       .map((b) => ({
         type: "bill" as const,
+        id: b.id,
         name: b.name,
         amount: b.amount,
         date: b.nextDate,
@@ -140,6 +143,7 @@ export function Dashboard() {
       .filter((e) => e.status !== "spent" && new Date(e.targetDate + "T00:00:00").getTime() <= eventCutoff)
       .map((e) => ({
         type: "event" as const,
+        id: e.id,
         name: e.name,
         amount: e.amount,
         date: e.targetDate,
@@ -385,6 +389,7 @@ export function Dashboard() {
             threshold={settings.threshold}
             selectedIndex={selectedPeriod}
             onPeriodClick={(i) => setSelectedPeriod(selectedPeriod === i ? null : i)}
+            onEventClick={() => router.push("/plans")}
           />
 
           {selectedPeriod !== null && periods[selectedPeriod] && (
@@ -416,8 +421,9 @@ export function Dashboard() {
             <div>
               <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
             {activityFeed.map((item, i) => (
-              <div
+              <Link
                 key={i}
+                href={item.type === "event" ? "/plans" : "/bills"}
                 className="flex items-center gap-3 border-b border-gray-100 px-3.5 py-3 last:border-b-0 transition-colors hover:bg-gray-50"
               >
                 <div
@@ -449,7 +455,7 @@ export function Dashboard() {
                     </div>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
             </div>
           ) : (
