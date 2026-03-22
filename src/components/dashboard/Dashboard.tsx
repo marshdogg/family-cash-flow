@@ -279,33 +279,23 @@ export function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
       {/* ── Metrics Strip ── */}
-      <div className="border-b border-gray-200 pb-6">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-[12px] font-medium text-gray-400">Balance</p>
-            <div className="mt-0.5 font-mono text-[28px] font-bold leading-none tracking-tight text-gray-900 sm:text-[36px]">
-              {formatCurrency(balance)}
-            </div>
-            <p className="mt-1.5 text-[12px] text-gray-400">
-              Last check-in {lastCheckInLabel}
-              {streak > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
-                  <Flame className="h-3 w-3" /> {streak} wk streak
-                </span>
-              )}
-            </p>
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-6">
+        <div>
+          <p className="text-[12px] font-medium text-gray-400">Balance</p>
+          <div className="mt-0.5 font-mono text-[28px] font-bold leading-none tracking-tight text-gray-900 sm:text-[36px]">
+            {formatCurrency(balance)}
           </div>
-
-          <Link
-            href="/check-in"
-            className="flex items-center gap-2 rounded-lg bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
-          >
-            <ClipboardCheck className="h-4 w-4" />
-            Check-In
-          </Link>
+          <p className="mt-1.5 text-[12px] text-gray-400">
+            Last check-in {lastCheckInLabel}
+            {streak > 0 && (
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
+                <Flame className="h-3 w-3" /> {streak} wk streak
+              </span>
+            )}
+          </p>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div>
             <p className="text-[11px] font-medium text-gray-400">Income</p>
             <p className="font-mono text-[16px] font-bold text-green-600 sm:text-[18px]">
@@ -345,6 +335,14 @@ export function Dashboard() {
               <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
             </p>
           </div>
+
+          <Link
+            href="/check-in"
+            className="flex items-center gap-2 rounded-lg bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
+          >
+            <ClipboardCheck className="h-4 w-4" />
+            Check-In
+          </Link>
         </div>
       </div>
 
