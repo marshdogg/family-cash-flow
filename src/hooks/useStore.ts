@@ -196,13 +196,16 @@ export function useStore() {
 
   const updatePlannedEvent = useCallback(async (id: string, event: Omit<PlannedEvent, "id" | "status">) => {
     const status = event.savedSoFar >= event.amount ? "funded" : "saving";
-    const { data } = await supabase.from("planned_events").update({
+    // Optimistic update
+    setPlannedEvents((prev) => prev.map((e) => e.id === id ? { ...e, ...event, status } : e));
+    const { data, error } = await supabase.from("planned_events").update({
       name: event.name, category: event.category, amount: event.amount,
       target_date: event.targetDate, saved_so_far: event.savedSoFar,
       contribution_amount: event.contributionAmount,
       contribution_frequency: event.contributionFrequency,
       status,
     }).eq("id", id).select().single();
+    if (error) console.error("Failed to update planned event:", error);
     if (data) {
       setPlannedEvents((prev) => prev.map((e) => e.id === id ? {
         id: data.id, name: data.name, category: data.category,
