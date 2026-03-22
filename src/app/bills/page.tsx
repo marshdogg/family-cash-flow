@@ -173,12 +173,12 @@ function BillsPage() {
                       {config.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-gray-900">{bill.name}</div>
+                      <div className="truncate text-[13px] font-semibold text-gray-900">{bill.name}</div>
                       <div className="mt-0.5 text-[11px] text-gray-400">
                         {bill.frequency} · Next: {new Date(bill.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </div>
                     </div>
-                    <div className="font-mono text-[14px] font-semibold text-gray-900">
+                    <div className="flex-shrink-0 font-mono text-[14px] font-semibold text-gray-900">
                       −{formatCurrency(bill.amount)}
                     </div>
                     <button

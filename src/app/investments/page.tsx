@@ -175,14 +175,14 @@ export default function InvestmentsPage() {
                       {config.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-gray-900">{inv.name}</div>
+                      <div className="truncate text-[13px] font-semibold text-gray-900">{inv.name}</div>
                       <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
                         <span>{inv.frequency === "one-time" ? "Lump sum" : inv.frequency}</span>
                         <span>·</span>
                         <span>Next: {new Date(inv.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                       </div>
                     </div>
-                    <div className="font-mono text-[14px] font-semibold text-purple-500">
+                    <div className="flex-shrink-0 font-mono text-[14px] font-semibold text-purple-500">
                       {formatCurrency(inv.amount)}
                     </div>
                     <button

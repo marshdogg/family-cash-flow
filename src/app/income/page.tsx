@@ -183,14 +183,14 @@ export default function IncomePage() {
                             {config.icon}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-[13px] font-semibold text-gray-900">{item.name}</div>
+                            <div className="truncate text-[13px] font-semibold text-gray-900">{item.name}</div>
                             <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
                               <span>{item.frequency}</span>
                               <span>·</span>
                               <span>Next: {new Date(item.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                             </div>
                           </div>
-                          <div className="font-mono text-[14px] font-semibold text-green-700">
+                          <div className="flex-shrink-0 font-mono text-[14px] font-semibold text-green-700">
                             +{formatCurrency(item.amount)}
                           </div>
                           <button
@@ -227,14 +227,14 @@ export default function IncomePage() {
                             {config.icon}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-[13px] font-semibold text-gray-900">{item.name}</div>
+                            <div className="truncate text-[13px] font-semibold text-gray-900">{item.name}</div>
                             <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
                               <span>one-time</span>
                               <span>·</span>
                               <span>Next: {new Date(item.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="flex-shrink-0 text-right">
                             <div className="font-mono text-[14px] font-semibold text-green-700">
                               +{formatCurrency(item.amount)}
                             </div>

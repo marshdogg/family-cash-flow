@@ -188,10 +188,10 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
           </div>
 
           <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
-            <button type="button" onClick={onClose} className="rounded-md border border-gray-200 px-4 py-2.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
+            <button type="button" onClick={onClose} className="rounded-md border border-gray-200 px-4 py-3 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="rounded-md bg-purple-500 px-5 py-3 text-[13px] font-bold text-white shadow-md hover:bg-purple-600 disabled:opacity-50">
               {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Income"}
             </button>
           </div>

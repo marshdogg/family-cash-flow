@@ -58,7 +58,7 @@ export function PeriodDetail({ period, whatIfPeriod, threshold, onClose }: Perio
       {/* Expanded detail */}
       {expanded && (
         <div className="border-t border-gray-100 px-4 py-4">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             {/* Inflows */}
             <div>
               <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-green-600">
