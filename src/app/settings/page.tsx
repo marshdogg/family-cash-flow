@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { UserPlus, Check, Save } from "lucide-react";
-import { useStore } from "@/hooks/useStore";
+import { useSharedStore } from "@/hooks/StoreProvider";
 
 type Cadence = "weekly" | "biweekly" | "monthly";
 
@@ -15,7 +15,7 @@ const CADENCE_OPTIONS: { value: Cadence; label: string; description: string }[] 
 ];
 
 export default function SettingsPage() {
-  const { settings, setSettings, loaded } = useStore();
+  const { settings, setSettings, loaded } = useSharedStore();
 
   const [householdName, setHouseholdName] = useState("");
   const [threshold, setThreshold] = useState("");

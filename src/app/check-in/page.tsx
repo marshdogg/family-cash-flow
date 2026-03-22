@@ -6,11 +6,11 @@ import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ClipboardCheck } from "lucide-react";
 import { CheckInWizard } from "@/components/check-in/CheckInWizard";
-import { useStore } from "@/hooks/useStore";
+import { useSharedStore } from "@/hooks/StoreProvider";
 
 export default function CheckInPage() {
   const router = useRouter();
-  const { bills, income, latestCheckIn, addCheckIn, loaded } = useStore();
+  const { bills, income, latestCheckIn, addCheckIn, loaded } = useSharedStore();
   const [started, setStarted] = useState(false);
 
   if (!loaded) return null;

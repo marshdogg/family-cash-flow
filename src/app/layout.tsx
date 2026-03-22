@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { StoreProvider } from "@/hooks/StoreProvider";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} ${jetbrains.variable}`}>
       <body className="font-sans">
-        {children}
+        <StoreProvider>
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

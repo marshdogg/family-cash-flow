@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Plus, Trash2 } from "lucide-react";
 import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
-import { useStore } from "@/hooks/useStore";
+import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
 
 const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
@@ -18,7 +18,7 @@ const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
 };
 
 export default function IncomePage() {
-  const { income, totalMonthlyIncome, addIncome, removeIncome, loaded } = useStore();
+  const { income, totalMonthlyIncome, addIncome, removeIncome, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
 
   if (!loaded) return null;

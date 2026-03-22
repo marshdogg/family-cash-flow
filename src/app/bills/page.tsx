@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Plus, Trash2 } from "lucide-react";
 import { AddBillForm } from "@/components/forms/AddBillForm";
-import { useStore } from "@/hooks/useStore";
+import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
 
 const BILL_ICONS: Record<string, { icon: string; bg: string }> = {
@@ -21,7 +21,7 @@ const BILL_ICONS: Record<string, { icon: string; bg: string }> = {
 };
 
 export default function BillsPage() {
-  const { bills, totalMonthlyBills, addBill, removeBill, loaded } = useStore();
+  const { bills, totalMonthlyBills, addBill, removeBill, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
 
   if (!loaded) return null;

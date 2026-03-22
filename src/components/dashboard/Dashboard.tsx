@@ -5,7 +5,7 @@ import { BalanceHero } from "./BalanceHero";
 import { ProjectionChart } from "./ProjectionChart";
 import { UpcomingBills } from "./UpcomingBills";
 import { QuickActions } from "./QuickActions";
-import { useStore } from "@/hooks/useStore";
+import { useSharedStore } from "@/hooks/StoreProvider";
 import { buildProjection, projectionTitle } from "@/lib/projection";
 import type { ViewMode } from "@/lib/projection";
 
@@ -16,7 +16,7 @@ const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
 ];
 
 export function Dashboard() {
-  const { bills, income, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useStore();
+  const { bills, income, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useSharedStore();
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
 
   const balance = latestCheckIn?.bankBalance ?? 0;
