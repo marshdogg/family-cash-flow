@@ -102,9 +102,14 @@ export default function AnalyticsPage() {
   const maxSaved = Math.max(...monthlySavings.map((m) => Math.abs(m.saved)), 1);
 
   // ── Runway in months ──
-  const runwayMonths = totalMonthlyBills > 0 && checkIns.length > 0
-    ? Math.round((checkIns[checkIns.length - 1].bankBalance) / totalMonthlyBills)
-    : 0;
+  // Net monthly burn = expenses - income. If income >= expenses, runway is infinite.
+  const monthlyNetBurn = totalMonthlyBills - totalMonthlyIncome;
+  const latestBalance = checkIns.length > 0 ? checkIns[checkIns.length - 1].bankBalance : 0;
+  const runwayMonths = checkIns.length > 0 && monthlyNetBurn > 0
+    ? Math.round(latestBalance / monthlyNetBurn)
+    : checkIns.length > 0 && monthlyNetBurn <= 0
+      ? -1  // -1 signals "sustainable" (income covers expenses)
+      : 0;
 
   // ── Insights ──
   const insights = useMemo(() => {
@@ -146,10 +151,19 @@ export default function AnalyticsPage() {
     }
 
     // Runway insight
-    if (runwayMonths > 0) {
+    if (runwayMonths === -1) {
+      items.push({
+        icon: "🛡",
+        title: "Sustainable — income covers expenses",
+        description: `You're earning more than you spend. Your balance grows each month.`,
+        tag: "healthy",
+        tagColor: "#3ecf8e",
+        tagBg: "#0d2e1a",
+      });
+    } else if (runwayMonths > 0) {
       items.push({
         icon: runwayMonths >= 6 ? "🛡" : "⚠️",
-        title: `${runwayMonths}-month runway at current spending`,
+        title: `${runwayMonths}-month runway at current net burn`,
         description: runwayMonths >= 6
           ? "You have a healthy buffer. Keep it up."
           : "Consider building toward 6+ months of cushion.",
@@ -239,8 +253,9 @@ export default function AnalyticsPage() {
                 />
                 <KpiCard
                   label="Runway"
-                  value={runwayMonths > 0 ? `${runwayMonths} months` : "—"}
-                  sub={runwayMonths > 0 ? "at current burn rate" : "complete a check-in"}
+                  value={runwayMonths === -1 ? "∞" : runwayMonths > 0 ? `${runwayMonths} mo` : "—"}
+                  sub={runwayMonths === -1 ? "income covers expenses" : runwayMonths > 0 ? "until balance hits $0" : "complete a check-in"}
+                  subColor={runwayMonths === -1 ? "text-green-600" : runwayMonths >= 6 ? "text-green-600" : runwayMonths > 0 ? "text-amber-600" : undefined}
                   accent="border-l-amber-500"
                 />
               </div>
@@ -326,27 +341,25 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Insights */}
-                <div className="rounded-lg bg-gray-900 p-5 shadow-md">
+                <div className="rounded-lg bg-white p-5 shadow-md">
                   <div className="mb-4">
-                    <h3 className="text-[13px] font-semibold text-gray-100">Runway Insights</h3>
-                    <p className="text-[12px] text-gray-500">What your data is telling you</p>
+                    <h3 className="text-[13px] font-semibold text-gray-900">Runway Insights</h3>
+                    <p className="text-[12px] text-gray-400">What your data is telling you</p>
                   </div>
                   <div className="space-y-3">
                     {insights.length > 0 ? insights.map((ins, i) => (
-                      <div key={i} className="rounded-lg border border-gray-800 bg-gray-800/50 p-3">
+                      <div key={i} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
                         <div className="flex gap-2.5">
                           <div
-                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[12px]"
-                            style={{ background: ins.tagBg }}
+                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-purple-50 text-[12px]"
                           >
                             {ins.icon}
                           </div>
                           <div className="min-w-0">
-                            <div className="text-[12px] font-semibold text-gray-100">{ins.title}</div>
+                            <div className="text-[12px] font-semibold text-gray-900">{ins.title}</div>
                             <div className="mt-0.5 text-[11px] text-gray-500 leading-relaxed">{ins.description}</div>
                             <span
-                              className="mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                              style={{ background: ins.tagBg, color: ins.tagColor }}
+                              className="mt-1.5 inline-block rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500"
                             >
                               {ins.tag}
                             </span>
@@ -354,7 +367,7 @@ export default function AnalyticsPage() {
                         </div>
                       </div>
                     )) : (
-                      <p className="py-4 text-center text-[12px] text-gray-500">Add more data to unlock insights</p>
+                      <p className="py-4 text-center text-[12px] text-gray-400">Add more data to unlock insights</p>
                     )}
                   </div>
                 </div>
