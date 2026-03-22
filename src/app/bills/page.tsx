@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -37,21 +37,25 @@ export default function BillsPageWrapper() {
 function BillsPage() {
   const { bills, totalMonthlyBills, addBill, updateBill, removeBill, loaded } = useSharedStore();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<Bill | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const consumedEditId = useRef<string | null>(null);
 
   // Auto-open edit form from ?edit=<id> deep link
   useEffect(() => {
     const editId = searchParams.get("edit");
-    if (editId && loaded && bills.length > 0) {
+    if (editId && editId !== consumedEditId.current && loaded && bills.length > 0) {
       const target = bills.find((b) => b.id === editId);
       if (target) {
+        consumedEditId.current = editId;
         setEditTarget(target);
         setShowForm(true);
+        router.replace("/bills", { scroll: false });
       }
     }
-  }, [searchParams, loaded, bills]);
+  }, [searchParams, loaded, bills, router]);
 
   const activeBills = bills.filter((b) => b.status === "active");
 
