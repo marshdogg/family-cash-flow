@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -25,11 +26,32 @@ const BILL_ICONS: Record<string, { icon: string; bg: string }> = {
 
 const FIXED_CATEGORIES = new Set(["housing", "insurance", "loan", "subscriptions", "childcare"]);
 
-export default function BillsPage() {
+export default function BillsPageWrapper() {
+  return (
+    <Suspense>
+      <BillsPage />
+    </Suspense>
+  );
+}
+
+function BillsPage() {
   const { bills, totalMonthlyBills, addBill, updateBill, removeBill, loaded } = useSharedStore();
+  const searchParams = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<Bill | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Auto-open edit form from ?edit=<id> deep link
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (editId && loaded && bills.length > 0) {
+      const target = bills.find((b) => b.id === editId);
+      if (target) {
+        setEditTarget(target);
+        setShowForm(true);
+      }
+    }
+  }, [searchParams, loaded, bills]);
 
   const activeBills = bills.filter((b) => b.status === "active");
 

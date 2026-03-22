@@ -389,7 +389,7 @@ export function Dashboard() {
             threshold={settings.threshold}
             selectedIndex={selectedPeriod}
             onPeriodClick={(i) => setSelectedPeriod(selectedPeriod === i ? null : i)}
-            onEventClick={() => router.push("/plans")}
+            onEventClick={(eventId) => router.push(`/plans?edit=${eventId}`)}
           />
 
           {selectedPeriod !== null && periods[selectedPeriod] && (
@@ -423,7 +423,7 @@ export function Dashboard() {
             {activityFeed.map((item, i) => (
               <Link
                 key={i}
-                href={item.type === "event" ? "/plans" : "/bills"}
+                href={item.type === "event" ? `/plans?edit=${item.id}` : `/bills?edit=${item.id}`}
                 className="flex items-center gap-3 border-b border-gray-100 px-3.5 py-3 last:border-b-0 transition-colors hover:bg-gray-50"
               >
                 <div

@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { formatCurrency } from "@/lib/format";
 
 interface EventMarker {
+  id?: string;
   name: string;
   icon: string;
   amount: number;
@@ -23,7 +24,7 @@ interface ProjectionChartProps {
   whatIfPeriods?: Period[];
   threshold: number;
   onPeriodClick?: (index: number) => void;
-  onEventClick?: () => void;
+  onEventClick?: (eventId: string) => void;
   selectedIndex?: number | null;
 }
 
@@ -41,7 +42,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
   const wrapRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const hitAreasRef = useRef<HitArea[]>([]);
-  const eventHitAreasRef = useRef<{ x: number; y: number; w: number; h: number }[]>([]);
+  const eventHitAreasRef = useRef<{ x: number; y: number; w: number; h: number; events: EventMarker[] }[]>([]);
   const rafRef = useRef(0);
   const [width, setWidth] = useState(0);
   const H = 340;
@@ -221,7 +222,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     hitAreasRef.current = hitAreas;
 
     // Planned event markers
-    const eventAreas: { x: number; y: number; w: number; h: number }[] = [];
+    const eventAreas: { x: number; y: number; w: number; h: number; events: EventMarker[] }[] = [];
     periods.forEach((p, i) => {
       const events = p.plannedEventItems;
       if (!events || events.length === 0) return;
@@ -263,8 +264,8 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
       ctx.textBaseline = "middle";
       ctx.fillText(label, pillX + pillW / 2, pillY + pillH / 2);
 
-      // Store hit area for click detection
-      eventAreas.push({ x: pillX, y: pillY, w: pillW, h: pillH });
+      // Store hit area for click detection + tooltip
+      eventAreas.push({ x: pillX, y: pillY, w: pillW, h: pillH, events });
     });
     eventHitAreasRef.current = eventAreas;
 
@@ -311,7 +312,19 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
       for (const area of eventHitAreasRef.current) {
         if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
           canvas.style.cursor = "pointer";
-          tooltip.style.display = "none";
+          tooltip.style.display = "block";
+          tooltip.style.left = clientX + 16 + "px";
+          tooltip.style.top = clientY - 16 + "px";
+          const mono = "font-family:'JetBrains Mono',monospace;font-weight:600;";
+          let html = `<div style="font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Planned Event${area.events.length > 1 ? "s" : ""}</div>`;
+          for (const ev of area.events) {
+            html += `<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px;">
+              <span style="color:rgba(255,255,255,0.9);">${ev.icon} ${ev.name}</span>
+              <span style="${mono}color:#FCD34D;">${formatCurrency(ev.amount)}</span>
+            </div>`;
+          }
+          html += `<div style="margin-top:6px;font-size:10px;color:rgba(255,255,255,0.35);">Click to view</div>`;
+          tooltip.innerHTML = html;
           return;
         }
       }
@@ -395,7 +408,9 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     // Check event marker pills first
     for (const area of eventHitAreasRef.current) {
       if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
-        onEventClick?.();
+        if (area.events.length > 0 && area.events[0].id) {
+          onEventClick?.(area.events[0].id);
+        }
         return;
       }
     }

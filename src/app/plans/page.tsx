@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -22,11 +23,32 @@ const PLAN_ICONS: Record<string, { icon: string; bg: string }> = {
   other: { icon: "\uD83D\uDCCB", bg: "#F3F4F6" },
 };
 
-export default function PlansPage() {
+export default function PlansPageWrapper() {
+  return (
+    <Suspense>
+      <PlansPage />
+    </Suspense>
+  );
+}
+
+function PlansPage() {
   const { plannedEvents, addPlannedEvent, updatePlannedEvent, removePlannedEvent, loaded } = useSharedStore();
+  const searchParams = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<PlannedEvent | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Auto-open edit form from ?edit=<id> deep link
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (editId && loaded && plannedEvents.length > 0) {
+      const target = plannedEvents.find((e) => e.id === editId);
+      if (target) {
+        setEditTarget(target);
+        setShowForm(true);
+      }
+    }
+  }, [searchParams, loaded, plannedEvents]);
 
   if (!loaded) return null;
 

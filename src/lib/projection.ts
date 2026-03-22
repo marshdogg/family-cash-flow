@@ -3,6 +3,7 @@ import type { Bill, IncomeSource, Investment, PlannedEvent } from "./types";
 export type ViewMode = "weekly" | "biweekly" | "monthly";
 
 export interface LineItem {
+  id?: string;
   name: string;
   icon: string;
   amount: number;
@@ -153,7 +154,7 @@ export function buildProjection(
     const plannedEventItems: LineItem[] = plannedEvents
       .filter((e) => e.status !== "spent")
       .filter((e) => { const d = new Date(e.targetDate + "T00:00:00"); return d >= periodStart && d <= periodEnd; })
-      .map((e) => ({ name: e.name, icon: EVENT_ICONS[e.category] || "📋", amount: e.amount }));
+      .map((e) => ({ id: e.id, name: e.name, icon: EVENT_ICONS[e.category] || "📋", amount: e.amount }));
 
     periods.push({
       label,
