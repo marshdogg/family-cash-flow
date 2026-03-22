@@ -368,16 +368,6 @@ export function Dashboard() {
           ))}
         </div>
 
-        {/* Desktop: What If beside toggle */}
-        {!whatIfOpen && (
-          <button
-            onClick={() => setWhatIfOpen(true)}
-            className="hidden items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:flex"
-          >
-            <Sparkles className="h-4 w-4" />
-            What If
-          </button>
-        )}
       </div>
 
       {/* ── Two Column: Chart + Activity Feed ── */}
@@ -402,20 +392,20 @@ export function Dashboard() {
             />
           )}
 
-          {/* Mobile: What If button below chart */}
+          {/* What If button below chart */}
           {!whatIfOpen && (
             <button
               onClick={() => setWhatIfOpen(true)}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100 sm:hidden"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-5 py-2.5 text-[13px] font-bold text-amber-700 shadow-md transition-colors hover:bg-amber-100"
             >
               <Sparkles className="h-4 w-4" />
               What If
             </button>
           )}
 
-          {/* Desktop: inline What If panel */}
+          {/* Inline What If panel */}
           {whatIfOpen && (
-            <div className="mt-4 hidden lg:block">
+            <div className="mt-4">
               <WhatIfPanel
                 items={whatIfItems}
                 onAdd={handleAddWhatIf}
@@ -479,24 +469,6 @@ export function Dashboard() {
           )}
         </div>
       </div>
-
-      {/* Mobile: bottom sheet What If panel */}
-      {whatIfOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setWhatIfOpen(false); setWhatIfItems([]); }} />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white px-4 pb-24 pt-4 shadow-xl">
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
-            <WhatIfPanel
-              items={whatIfItems}
-              onAdd={handleAddWhatIf}
-              onRemove={handleRemoveWhatIf}
-              onClear={() => setWhatIfItems([])}
-              onClose={() => { setWhatIfOpen(false); setWhatIfItems([]); }}
-              monthlyImpact={whatIfMonthlyImpact}
-            />
-          </div>
-        </div>
-      )}
 
     </div>
   );
