@@ -20,9 +20,18 @@ export function Sidebar() {
   return (
     <aside className="hidden w-56 flex-shrink-0 border-r border-gray-200 bg-white lg:flex lg:flex-col">
       <div className="flex h-16 items-center gap-2.5 px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-primary">
-          <span className="text-xs font-extrabold text-white">R</span>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" className="h-8 w-auto" fill="none" aria-hidden="true">
+          <path d="M76,36 C76,16 24,16 24,36 C24,56 76,56 76,84 C76,104 24,104 24,84" stroke="#1C1C24" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
+          <line x1="50" y1="4" x2="50" y2="136" stroke="#1C1C24" strokeWidth="20" strokeLinecap="round"/>
+          <rect x="36" y="6" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <rect x="36" y="13" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <rect x="36" y="20" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <rect x="36" y="114" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <rect x="36" y="121" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <rect x="36" y="128" width="27" height="3.5" rx="1" fill="white" opacity=".9"/>
+          <path d="M76,36 C76,16 24,16 24,36 C24,56 76,56 76,84 C76,104 24,104 24,84" stroke="white" strokeWidth="2.5" strokeDasharray="9 7" strokeLinecap="butt"/>
+          <line x1="50" y1="27" x2="50" y2="112" stroke="white" strokeWidth="2.5" strokeDasharray="9 7" strokeLinecap="butt"/>
+        </svg>
         <span className="text-[15px] font-bold text-gray-900">Runway</span>
       </div>
 
