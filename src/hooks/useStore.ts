@@ -2,13 +2,26 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Bill, IncomeSource, CheckIn } from "@/lib/types";
+import type { Bill, IncomeSource, Investment, CheckIn } from "@/lib/types";
 
 const HOUSEHOLD_ID = "00000000-0000-0000-0000-000000000001";
+
+function mapRow<T extends { id: string; name: string; category: string; amount: number; frequency: string; nextDate: string; status: string }>(r: Record<string, unknown>): T {
+  return {
+    id: r.id,
+    name: r.name,
+    category: r.category,
+    amount: Number(r.amount),
+    frequency: r.frequency,
+    nextDate: r.next_date,
+    status: r.status,
+  } as T;
+}
 
 export function useStore() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [income, setIncome] = useState<IncomeSource[]>([]);
+  const [investments, setInvestments] = useState<Investment[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [settings, setSettingsState] = useState({ threshold: 500, cadence: "weekly", householdName: "Our Household" });
   const [loaded, setLoaded] = useState(false);
@@ -16,51 +29,32 @@ export function useStore() {
   // ── Load from Supabase on mount ──
   useEffect(() => {
     async function load() {
-      const [billsRes, incomeRes, checkInsRes, householdRes] = await Promise.all([
+      const [billsRes, incomeRes, investRes, checkInsRes, householdRes] = await Promise.all([
         supabase.from("bills").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
         supabase.from("income_sources").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
+        supabase.from("investments").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
         supabase.from("check_ins").select("*").eq("household_id", HOUSEHOLD_ID).order("completed_at", { ascending: true }),
         supabase.from("households").select("*").eq("id", HOUSEHOLD_ID).single(),
       ]);
 
-      if (billsRes.data) {
-        setBills(billsRes.data.map((r) => ({
-          id: r.id,
-          name: r.name,
-          category: r.category,
-          amount: Number(r.amount),
-          frequency: r.frequency,
-          nextDate: r.next_date,
-          status: r.status,
-        })));
-      }
-
-      if (incomeRes.data) {
-        setIncome(incomeRes.data.map((r) => ({
-          id: r.id,
-          name: r.name,
-          category: r.category,
-          amount: Number(r.amount),
-          frequency: r.frequency,
-          nextDate: r.next_date,
-          status: r.status,
-        })));
-      }
+      if (billsRes.data) setBills(billsRes.data.map((r) => mapRow<Bill>(r)));
+      if (incomeRes.data) setIncome(incomeRes.data.map((r) => mapRow<IncomeSource>(r)));
+      if (investRes.data) setInvestments(investRes.data.map((r) => mapRow<Investment>(r)));
 
       if (checkInsRes.data) {
         setCheckIns(checkInsRes.data.map((r) => ({
-          id: r.id,
+          id: r.id as string,
           bankBalance: Number(r.bank_balance),
-          completedAt: r.completed_at,
-          weekStart: r.week_start,
+          completedAt: r.completed_at as string,
+          weekStart: r.week_start as string,
         })));
       }
 
       if (householdRes.data) {
         setSettingsState({
           threshold: Number(householdRes.data.min_balance),
-          cadence: householdRes.data.cadence,
-          householdName: householdRes.data.name,
+          cadence: householdRes.data.cadence as string,
+          householdName: householdRes.data.name as string,
         });
       }
 
@@ -69,33 +63,24 @@ export function useStore() {
     load();
   }, []);
 
-  // ── Bills ──
-  const addBill = useCallback(async (bill: Omit<Bill, "id" | "status">) => {
+  // ── Generic insert helper ──
+  async function insertRow(table: string, row: Record<string, unknown>) {
     const { data, error } = await supabase
-      .from("bills")
-      .insert({
-        household_id: HOUSEHOLD_ID,
-        name: bill.name,
-        category: bill.category,
-        amount: bill.amount,
-        frequency: bill.frequency,
-        next_date: bill.nextDate,
-        status: "active",
-      })
+      .from(table)
+      .insert({ household_id: HOUSEHOLD_ID, ...row })
       .select()
       .single();
+    if (error) return null;
+    return data;
+  }
 
-    if (data && !error) {
-      setBills((prev) => [...prev, {
-        id: data.id,
-        name: data.name,
-        category: data.category,
-        amount: Number(data.amount),
-        frequency: data.frequency,
-        nextDate: data.next_date,
-        status: data.status,
-      }]);
-    }
+  // ── Bills ──
+  const addBill = useCallback(async (bill: Omit<Bill, "id" | "status">) => {
+    const data = await insertRow("bills", {
+      name: bill.name, category: bill.category, amount: bill.amount,
+      frequency: bill.frequency, next_date: bill.nextDate, status: "active",
+    });
+    if (data) setBills((prev) => [...prev, mapRow<Bill>(data)]);
   }, []);
 
   const removeBill = useCallback(async (id: string) => {
@@ -105,36 +90,30 @@ export function useStore() {
 
   // ── Income ──
   const addIncome = useCallback(async (item: Omit<IncomeSource, "id">) => {
-    const { data, error } = await supabase
-      .from("income_sources")
-      .insert({
-        household_id: HOUSEHOLD_ID,
-        name: item.name,
-        category: item.category,
-        amount: item.amount,
-        frequency: item.frequency,
-        next_date: item.nextDate,
-        status: item.status,
-      })
-      .select()
-      .single();
-
-    if (data && !error) {
-      setIncome((prev) => [...prev, {
-        id: data.id,
-        name: data.name,
-        category: data.category,
-        amount: Number(data.amount),
-        frequency: data.frequency,
-        nextDate: data.next_date,
-        status: data.status,
-      }]);
-    }
+    const data = await insertRow("income_sources", {
+      name: item.name, category: item.category, amount: item.amount,
+      frequency: item.frequency, next_date: item.nextDate, status: item.status,
+    });
+    if (data) setIncome((prev) => [...prev, mapRow<IncomeSource>(data)]);
   }, []);
 
   const removeIncome = useCallback(async (id: string) => {
     await supabase.from("income_sources").delete().eq("id", id);
     setIncome((prev) => prev.filter((i) => i.id !== id));
+  }, []);
+
+  // ── Investments ──
+  const addInvestment = useCallback(async (inv: Omit<Investment, "id" | "status">) => {
+    const data = await insertRow("investments", {
+      name: inv.name, category: inv.category, amount: inv.amount,
+      frequency: inv.frequency, next_date: inv.nextDate, status: "active",
+    });
+    if (data) setInvestments((prev) => [...prev, mapRow<Investment>(data)]);
+  }, []);
+
+  const removeInvestment = useCallback(async (id: string) => {
+    await supabase.from("investments").delete().eq("id", id);
+    setInvestments((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
   // ── Check-Ins ──
@@ -183,12 +162,12 @@ export function useStore() {
 
   // ── Computed ──
   const toMonthly = (amount: number, frequency: string) => {
-    if (frequency === "weekly") return amount * (52 / 12);       // 4.333
-    if (frequency === "biweekly") return amount * (26 / 12);     // 2.167
-    if (frequency === "semimonthly") return amount * 2;           // exactly 2x/month
+    if (frequency === "weekly") return amount * (52 / 12);
+    if (frequency === "biweekly") return amount * (26 / 12);
+    if (frequency === "semimonthly") return amount * 2;
     if (frequency === "quarterly") return amount / 3;
     if (frequency === "annually") return amount / 12;
-    return amount; // monthly
+    return amount;
   };
 
   const totalMonthlyBills = bills
@@ -199,19 +178,27 @@ export function useStore() {
     .filter((i) => i.frequency !== "one-time")
     .reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0);
 
+  const totalMonthlyInvestments = investments
+    .filter((i) => i.status === "active" && i.frequency !== "one-time")
+    .reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0);
+
   return {
     loaded,
     bills,
     income,
+    investments,
     checkIns,
     settings,
     latestCheckIn,
     totalMonthlyBills,
     totalMonthlyIncome,
+    totalMonthlyInvestments,
     addBill,
     removeBill,
     addIncome,
     removeIncome,
+    addInvestment,
+    removeInvestment,
     addCheckIn,
     setSettings,
   };

@@ -16,7 +16,7 @@ const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
 ];
 
 export function Dashboard() {
-  const { bills, income, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useSharedStore();
+  const { bills, income, investments, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useSharedStore();
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
 
   const balance = latestCheckIn?.bankBalance ?? 0;
@@ -32,8 +32,8 @@ export function Dashboard() {
   }, [latestCheckIn]);
 
   const periods = useMemo(
-    () => buildProjection(balance, bills, income, viewMode),
-    [balance, bills, income, viewMode]
+    () => buildProjection(balance, bills, income, investments, viewMode),
+    [balance, bills, income, investments, viewMode]
   );
 
   // Upcoming bills (next 14 days)

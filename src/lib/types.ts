@@ -22,6 +22,18 @@ export interface IncomeSource {
   status: "active" | "expected";
 }
 
+export type InvestmentCategory = "rrsp" | "tfsa" | "resp" | "brokerage" | "realestate" | "crypto" | "other";
+
+export interface Investment {
+  id: string;
+  name: string;
+  category: InvestmentCategory;
+  amount: number;
+  frequency: Frequency;
+  nextDate: string;
+  status: "active" | "paused";
+}
+
 export interface CheckIn {
   id: string;
   bankBalance: number;

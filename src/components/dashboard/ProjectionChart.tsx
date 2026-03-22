@@ -7,6 +7,7 @@ interface Period {
   label: string;
   income: number;
   expense: number;
+  invested: number;
   balance: number;
 }
 
@@ -194,11 +195,17 @@ export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
 
       if (closest) {
         const p = closest.period;
-        const net = p.income - p.expense;
+        const net = p.income - p.expense - p.invested;
         tooltip.style.display = "block";
         tooltip.style.left = clientX + 16 + "px";
         tooltip.style.top = clientY - 16 + "px";
         canvas.style.cursor = "pointer";
+
+        const investedRow = p.invested > 0 ? `
+          <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
+            <span style="color:rgba(255,255,255,0.6);">Invested</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#C4B5FD;">−${formatCurrency(p.invested)}</span>
+          </div>` : '';
 
         tooltip.innerHTML = `
           <div style="font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${p.label}</div>
@@ -215,6 +222,7 @@ export function ProjectionChart({ periods, threshold }: ProjectionChartProps) {
             <span style="color:rgba(255,255,255,0.6);">Outflows</span>
             <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#FCA5A5;">−${formatCurrency(p.expense)}</span>
           </div>
+          ${investedRow}
           <div style="height:1px;background:rgba(255,255,255,0.1);margin:6px 0;"></div>
           <div style="display:flex;justify-content:space-between;gap:20px;">
             <span style="color:rgba(255,255,255,0.6);">Net</span>
