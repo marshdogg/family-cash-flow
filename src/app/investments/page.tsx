@@ -1,14 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Calendar, Clock } from "lucide-react";
 import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
 import type { Investment } from "@/lib/types";
+
+function toMonthly(amount: number, frequency: string): number {
+  switch (frequency) {
+    case "weekly": return amount * (52 / 12);
+    case "biweekly": return amount * (26 / 12);
+    case "semimonthly": return amount * 2;
+    case "monthly": return amount;
+    case "quarterly": return amount / 3;
+    case "annually": return amount / 12;
+    default: return amount;
+  }
+}
+
+function estimateYtdContributions(inv: Investment): number {
+  if (inv.frequency === "one-time" || inv.status !== "active") return 0;
+  const now = new Date();
+  const monthsElapsed = now.getMonth() + (now.getDate() / 30);
+  const monthly = toMonthly(inv.amount, inv.frequency);
+  return monthly * monthsElapsed;
+}
 
 const INVEST_ICONS: Record<string, { icon: string; bg: string }> = {
   rrsp: { icon: "📊", bg: "#F0EBFF" },
@@ -26,11 +46,28 @@ export default function InvestmentsPage() {
   const [editTarget, setEditTarget] = useState<Investment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
+  const recurring = useMemo(() => investments.filter((i) => i.frequency !== "one-time" && i.status === "active"), [investments]);
+
+  const projectedAnnual = Math.round(totalMonthlyInvestments * 12);
+
+  const nextContribution = useMemo(() => {
+    if (recurring.length === 0) return null;
+    const sorted = [...recurring].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+    const nextDate = sorted[0].nextDate;
+    const sameDay = sorted.filter((i) => i.nextDate === nextDate);
+    const combined = sameDay.reduce((sum, i) => sum + i.amount, 0);
+    const daysUntil = Math.max(0, Math.ceil((new Date(nextDate + "T00:00:00").getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+    return { date: nextDate, combined, daysUntil };
+  }, [recurring]);
+
+  const ytdContributed = useMemo(() => {
+    return Math.round(investments.reduce((sum, i) => sum + estimateYtdContributions(i), 0));
+  }, [investments]);
+
   if (!loaded) return null;
 
-  const recurring = investments.filter((i) => i.frequency !== "one-time" && i.status === "active");
-  const oneTime = investments.filter((i) => i.frequency === "one-time");
-  const totalOneTime = oneTime.reduce((sum, i) => sum + i.amount, 0);
+  const now = new Date();
+  const ytdLabel = `Jan – ${now.toLocaleDateString("en-US", { month: "short" })} ${now.getFullYear()}`;
 
   return (
     <div className="flex min-h-screen">
@@ -56,20 +93,55 @@ export default function InvestmentsPage() {
             </p>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all recurring investment contributions, normalized to a monthly amount">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Monthly Contributions</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-purple-500">
-                {formatCurrency(Math.round(totalMonthlyInvestments))}
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Projected Annual */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Total of all recurring contributions projected over 12 months">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-purple-500 to-purple-300" />
+              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-purple-50">
+                <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Projected Annual</p>
+              <p className="mt-1 font-mono text-[22px] font-semibold text-purple-600">
+                {formatCurrency(projectedAnnual)}
               </p>
-              <p className="mt-0.5 text-[11px] text-gray-400">{recurring.length} active investments</p>
+              <p className="mt-0.5 text-[11px] text-gray-400">Based on current rate</p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md" title="One-time lump sum investments that aren't recurring contributions">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Upcoming Lump Sums</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-blue-500">
-                {formatCurrency(totalOneTime)}
+
+            {/* Next Contribution */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Your next upcoming investment contribution">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-emerald-500 to-emerald-300" />
+              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50">
+                <Calendar className="h-3.5 w-3.5 text-emerald-600" />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Next Contribution</p>
+              {nextContribution ? (
+                <>
+                  <p className="mt-1 text-[22px] font-semibold text-emerald-700">
+                    {new Date(nextContribution.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-gray-400">
+                    In {nextContribution.daysUntil === 0 ? "today" : `${nextContribution.daysUntil}d`} · {formatCurrency(nextContribution.combined)} combined
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 text-[22px] font-semibold text-gray-300">—</p>
+                  <p className="mt-0.5 text-[11px] text-gray-400">No recurring investments</p>
+                </>
+              )}
+            </div>
+
+            {/* YTD Contributed */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Estimated total contributions year-to-date">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-gradient-to-r from-amber-500 to-amber-300" />
+              <div className="absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-amber-50">
+                <Clock className="h-3.5 w-3.5 text-amber-600" />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">YTD Contributed</p>
+              <p className="mt-1 font-mono text-[22px] font-semibold text-amber-700">
+                {formatCurrency(ytdContributed)}
               </p>
-              <p className="mt-0.5 text-[11px] text-gray-400">{oneTime.length} planned</p>
+              <p className="mt-0.5 text-[11px] text-gray-400">{ytdLabel}</p>
             </div>
           </div>
 
