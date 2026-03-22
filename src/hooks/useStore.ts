@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Bill, IncomeSource, Investment, CheckIn } from "@/lib/types";
+import type { Bill, IncomeSource, Investment, PlannedEvent, CheckIn } from "@/lib/types";
 
 const HOUSEHOLD_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -22,6 +22,7 @@ export function useStore() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [income, setIncome] = useState<IncomeSource[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [plannedEvents, setPlannedEvents] = useState<PlannedEvent[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [settings, setSettingsState] = useState({ threshold: 500, cadence: "weekly", householdName: "Our Household" });
   const [loaded, setLoaded] = useState(false);
@@ -29,10 +30,11 @@ export function useStore() {
   // ── Load from Supabase on mount ──
   useEffect(() => {
     async function load() {
-      const [billsRes, incomeRes, investRes, checkInsRes, householdRes] = await Promise.all([
+      const [billsRes, incomeRes, investRes, plansRes, checkInsRes, householdRes] = await Promise.all([
         supabase.from("bills").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
         supabase.from("income_sources").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
         supabase.from("investments").select("*").eq("household_id", HOUSEHOLD_ID).order("next_date"),
+        supabase.from("planned_events").select("*").eq("household_id", HOUSEHOLD_ID).order("target_date"),
         supabase.from("check_ins").select("*").eq("household_id", HOUSEHOLD_ID).order("completed_at", { ascending: true }),
         supabase.from("households").select("*").eq("id", HOUSEHOLD_ID).single(),
       ]);
@@ -40,6 +42,18 @@ export function useStore() {
       if (billsRes.data) setBills(billsRes.data.map((r) => mapRow<Bill>(r)));
       if (incomeRes.data) setIncome(incomeRes.data.map((r) => mapRow<IncomeSource>(r)));
       if (investRes.data) setInvestments(investRes.data.map((r) => mapRow<Investment>(r)));
+
+      if (plansRes.data) {
+        setPlannedEvents(plansRes.data.map((r) => ({
+          id: r.id as string,
+          name: r.name as string,
+          category: r.category as PlannedEvent["category"],
+          amount: Number(r.amount),
+          targetDate: r.target_date as string,
+          savedSoFar: Number(r.saved_so_far),
+          status: r.status as PlannedEvent["status"],
+        })));
+      }
 
       if (checkInsRes.data) {
         setCheckIns(checkInsRes.data.map((r) => ({
@@ -116,6 +130,48 @@ export function useStore() {
     setInvestments((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  // ── Planned Events ──
+  const addPlannedEvent = useCallback(async (event: Omit<PlannedEvent, "id" | "status">) => {
+    const { data, error } = await supabase
+      .from("planned_events")
+      .insert({
+        household_id: HOUSEHOLD_ID,
+        name: event.name,
+        category: event.category,
+        amount: event.amount,
+        target_date: event.targetDate,
+        saved_so_far: event.savedSoFar,
+        status: event.savedSoFar >= event.amount ? "funded" : "saving",
+      })
+      .select()
+      .single();
+
+    if (data && !error) {
+      setPlannedEvents((prev) => [...prev, {
+        id: data.id,
+        name: data.name,
+        category: data.category,
+        amount: Number(data.amount),
+        targetDate: data.target_date,
+        savedSoFar: Number(data.saved_so_far),
+        status: data.status,
+      }]);
+    }
+  }, []);
+
+  const removePlannedEvent = useCallback(async (id: string) => {
+    await supabase.from("planned_events").delete().eq("id", id);
+    setPlannedEvents((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
+  const updatePlannedEventSaved = useCallback(async (id: string, savedSoFar: number) => {
+    const event = plannedEvents.find((e) => e.id === id);
+    if (!event) return;
+    const status = savedSoFar >= event.amount ? "funded" : "saving";
+    await supabase.from("planned_events").update({ saved_so_far: savedSoFar, status }).eq("id", id);
+    setPlannedEvents((prev) => prev.map((e) => e.id === id ? { ...e, savedSoFar, status } : e));
+  }, [plannedEvents]);
+
   // ── Check-Ins ──
   const addCheckIn = useCallback(async (bankBalance: number) => {
     const now = new Date();
@@ -182,23 +238,43 @@ export function useStore() {
     .filter((i) => i.status === "active" && i.frequency !== "one-time")
     .reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0);
 
+  // Monthly savings needed for all planned events
+  const totalMonthlySavingsNeeded = plannedEvents
+    .filter((e) => e.status === "saving")
+    .reduce((sum, e) => {
+      const remaining = e.amount - e.savedSoFar;
+      const monthsLeft = Math.max(1, Math.ceil(
+        (new Date(e.targetDate + "T00:00:00").getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
+      ));
+      return sum + remaining / monthsLeft;
+    }, 0);
+
+  // Available to spend: income - bills - investments - savings needed
+  const monthlyAvailableToSpend = totalMonthlyIncome - totalMonthlyBills - totalMonthlyInvestments - totalMonthlySavingsNeeded;
+
   return {
     loaded,
     bills,
     income,
     investments,
+    plannedEvents,
     checkIns,
     settings,
     latestCheckIn,
     totalMonthlyBills,
     totalMonthlyIncome,
     totalMonthlyInvestments,
+    totalMonthlySavingsNeeded,
+    monthlyAvailableToSpend,
     addBill,
     removeBill,
     addIncome,
     removeIncome,
     addInvestment,
     removeInvestment,
+    addPlannedEvent,
+    removePlannedEvent,
+    updatePlannedEventSaved,
     addCheckIn,
     setSettings,
   };

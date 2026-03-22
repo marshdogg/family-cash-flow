@@ -19,7 +19,7 @@ const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
 ];
 
 export function Dashboard() {
-  const { bills, income, investments, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, checkIns, settings, loaded } = useSharedStore();
+  const { bills, income, investments, plannedEvents, latestCheckIn, totalMonthlyBills, totalMonthlyIncome, monthlyAvailableToSpend, checkIns, settings, loaded } = useSharedStore();
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
@@ -37,8 +37,8 @@ export function Dashboard() {
   }, [latestCheckIn]);
 
   const periods = useMemo(
-    () => buildProjection(balance, bills, income, investments, viewMode),
-    [balance, bills, income, investments, viewMode]
+    () => buildProjection(balance, bills, income, investments, viewMode, plannedEvents),
+    [balance, bills, income, investments, viewMode, plannedEvents]
   );
 
   const whatIfPeriods = useMemo(
@@ -98,7 +98,9 @@ export function Dashboard() {
         lastCheckIn={lastCheckInLabel}
         weeklyIncome={Math.round(weeklyIncome)}
         weeklyExpenses={Math.round(weeklyExpenses)}
+        monthlyAvailableToSpend={monthlyAvailableToSpend}
         streak={streak}
+        viewMode={viewMode}
       />
 
       <QuickActions />

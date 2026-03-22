@@ -1,4 +1,4 @@
-import type { Bill, IncomeSource, Investment } from "./types";
+import type { Bill, IncomeSource, Investment, PlannedEvent } from "./types";
 
 export type ViewMode = "weekly" | "biweekly" | "monthly";
 
@@ -44,7 +44,8 @@ export function buildProjection(
   bills: Bill[],
   income: IncomeSource[],
   investments: Investment[],
-  viewMode: ViewMode
+  viewMode: ViewMode,
+  plannedEvents: PlannedEvent[] = []
 ): ProjectionPeriod[] {
   const activeBills = bills.filter((b) => b.status === "active" && b.frequency !== "one-time");
   const activeIncome = income.filter((i) => i.frequency !== "one-time");
@@ -53,6 +54,11 @@ export function buildProjection(
   const oneTimeBills = bills.filter((b) => b.frequency === "one-time" && b.status === "active");
   const oneTimeIncome = income.filter((i) => i.frequency === "one-time");
   const oneTimeInvestments = investments.filter((i) => i.frequency === "one-time" && i.status === "active");
+
+  // Planned events that haven't been spent yet show as future one-time expenses
+  const plannedOneTimeExpenses: { nextDate: string; amount: number }[] = plannedEvents
+    .filter((e) => e.status !== "spent")
+    .map((e) => ({ nextDate: e.targetDate, amount: e.amount }));
 
   const dailyExpense = activeBills.reduce((sum, b) => sum + toDailyRate(b.amount, b.frequency), 0);
   const dailyIncome = activeIncome.reduce((sum, i) => sum + toDailyRate(i.amount, i.frequency), 0);
@@ -95,6 +101,7 @@ export function buildProjection(
     let periodInvested = Math.round(dailyInvestment * days);
 
     periodExpense += sumOneTimeInPeriod(oneTimeBills, periodStart, periodEnd);
+    periodExpense += sumOneTimeInPeriod(plannedOneTimeExpenses, periodStart, periodEnd);
     periodIncome += sumOneTimeInPeriod(oneTimeIncome, periodStart, periodEnd);
     periodInvested += sumOneTimeInPeriod(oneTimeInvestments, periodStart, periodEnd);
 

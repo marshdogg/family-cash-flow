@@ -34,6 +34,18 @@ export interface Investment {
   status: "active" | "paused";
 }
 
+export type PlannedEventCategory = "trip" | "camp" | "holiday" | "school" | "car" | "home" | "medical" | "other";
+
+export interface PlannedEvent {
+  id: string;
+  name: string;
+  category: PlannedEventCategory;
+  amount: number;
+  targetDate: string;
+  savedSoFar: number;
+  status: "saving" | "funded" | "spent";
+}
+
 export interface CheckIn {
   id: string;
   bankBalance: number;
