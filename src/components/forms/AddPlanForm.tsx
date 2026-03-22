@@ -192,25 +192,40 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
             </div>
 
             {/* Recurring contribution toggle */}
-            <div className="rounded-lg border border-gray-200 p-4">
-              <label htmlFor="plan-contrib-toggle" className="flex cursor-pointer items-center gap-3">
+            {(() => {
+              const savedNum = parseFloat(savedSoFar) || 0;
+              const amountNum = parseFloat(amount) || 0;
+              const fullyFunded = amountNum > 0 && savedNum >= amountNum;
+              return (
+            <div className={`rounded-lg border p-4 ${fullyFunded ? "border-green-200 bg-green-50" : "border-gray-200"}`}>
+              <label htmlFor="plan-contrib-toggle" className={`flex items-center gap-3 ${fullyFunded ? "cursor-default" : "cursor-pointer"}`}>
                 <button
                   id="plan-contrib-toggle"
                   type="button"
                   role="switch"
                   aria-checked={hasContribution}
-                  onClick={() => setHasContribution(!hasContribution)}
-                  className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${hasContribution ? "bg-purple-500" : "bg-gray-200"}`}
+                  disabled={fullyFunded}
+                  onClick={() => { if (!fullyFunded) setHasContribution(!hasContribution); }}
+                  className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${fullyFunded ? "bg-green-400 cursor-not-allowed" : hasContribution ? "bg-purple-500" : "bg-gray-200"}`}
                 >
-                  <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${hasContribution ? "left-6" : "left-1"}`} />
+                  <div className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${fullyFunded || hasContribution ? "left-6" : "left-1"}`} />
                 </button>
                 <div>
-                  <span className="text-[13px] font-semibold text-gray-700">Set up recurring savings</span>
-                  <p className="mt-0.5 text-[11px] text-gray-400">Automatically factor a regular contribution into your projection</p>
+                  {fullyFunded ? (
+                    <>
+                      <span className="text-[13px] font-semibold text-green-700">Fully funded</span>
+                      <p className="mt-0.5 text-[11px] text-green-600">This plan is fully saved for — no contributions needed</p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[13px] font-semibold text-gray-700">Set up recurring savings</span>
+                      <p className="mt-0.5 text-[11px] text-gray-400">Automatically factor a regular contribution into your projection</p>
+                    </>
+                  )}
                 </div>
               </label>
 
-              {hasContribution && (
+              {hasContribution && !fullyFunded && (
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="plan-contrib-amount" className="text-[12px] font-semibold text-gray-500">Contribution Amount</label>
@@ -248,6 +263,8 @@ export function AddPlanForm({ onSubmit, onClose, initialData }: AddPlanFormProps
                 </div>
               )}
             </div>
+              );
+            })()}
           </div>
 
           <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
