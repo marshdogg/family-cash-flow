@@ -3,15 +3,17 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { Sparkles, Flame, ClipboardCheck, Check } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ProjectionChart } from "./ProjectionChart";
 import { PeriodDetail } from "./PeriodDetail";
 import { WhatIfPanel } from "./WhatIfPanel";
 import type { WhatIfItem } from "./WhatIfPanel";
+import { AddBillForm } from "@/components/forms/AddBillForm";
+import { AddPlanForm } from "@/components/forms/AddPlanForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { buildProjection, buildWhatIfProjection } from "@/lib/projection";
 import { formatCurrency } from "@/lib/format";
 import type { ViewMode } from "@/lib/projection";
+import type { Bill, PlannedEvent } from "@/lib/types";
 
 const VIEW_OPTIONS: { value: ViewMode; label: string; full: string }[] = [
   { value: "weekly", label: "W", full: "Weekly" },
@@ -36,7 +38,6 @@ const EVENT_ICONS: Record<string, string> = {
 };
 
 export function Dashboard() {
-  const router = useRouter();
   const store = useSharedStore();
   const [previewEmpty, setPreviewEmpty] = useState(false);
 
@@ -46,7 +47,7 @@ export function Dashboard() {
     }
   }, []);
 
-  const { bills: realBills, income: realIncome, investments: realInvestments, plannedEvents: realPlannedEvents, latestCheckIn: realLatestCheckIn, totalMonthlyBills: realTotalMonthlyBills, totalMonthlyIncome: realTotalMonthlyIncome, totalMonthlyInvestments: realTotalMonthlyInvestments, totalMonthlySavingsNeeded: realTotalMonthlySavingsNeeded, monthlyAvailableToSpend: realMonthlyAvailableToSpend, checkIns: realCheckIns, settings, loaded } = store;
+  const { bills: realBills, income: realIncome, investments: realInvestments, plannedEvents: realPlannedEvents, latestCheckIn: realLatestCheckIn, totalMonthlyBills: realTotalMonthlyBills, totalMonthlyIncome: realTotalMonthlyIncome, totalMonthlyInvestments: realTotalMonthlyInvestments, totalMonthlySavingsNeeded: realTotalMonthlySavingsNeeded, monthlyAvailableToSpend: realMonthlyAvailableToSpend, checkIns: realCheckIns, updateBill, updatePlannedEvent, settings, loaded } = store;
 
   const bills = previewEmpty ? [] : realBills;
   const income = previewEmpty ? [] : realIncome;
@@ -64,6 +65,8 @@ export function Dashboard() {
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
+  const [editBill, setEditBill] = useState<Bill | null>(null);
+  const [editPlan, setEditPlan] = useState<PlannedEvent | null>(null);
 
   const balance = latestCheckIn?.bankBalance ?? 0;
   const weeklyExpenses = totalMonthlyBills / (52 / 12);
@@ -380,7 +383,10 @@ export function Dashboard() {
             threshold={settings.threshold}
             selectedIndex={selectedPeriod}
             onPeriodClick={(i) => setSelectedPeriod(selectedPeriod === i ? null : i)}
-            onEventClick={(eventId) => router.push(`/plans?edit=${eventId}`)}
+            onEventClick={(eventId) => {
+              const plan = plannedEvents.find((e) => e.id === eventId);
+              if (plan) setEditPlan(plan);
+            }}
           />
 
           {selectedPeriod !== null && periods[selectedPeriod] && (
@@ -424,10 +430,18 @@ export function Dashboard() {
             <div>
               <h3 className="border-b border-gray-100 px-3.5 py-2 text-[11px] font-bold tracking-wider text-gray-400">UPCOMING</h3>
             {activityFeed.map((item, i) => (
-              <Link
+              <button
                 key={i}
-                href={item.type === "event" ? `/plans?edit=${item.id}` : `/bills?edit=${item.id}`}
-                className="flex items-center gap-3 border-b border-gray-100 px-3.5 py-3 last:border-b-0 transition-colors hover:bg-gray-50"
+                onClick={() => {
+                  if (item.type === "event") {
+                    const plan = plannedEvents.find((e) => e.id === item.id);
+                    if (plan) setEditPlan(plan);
+                  } else {
+                    const bill = bills.find((b) => b.id === item.id);
+                    if (bill) setEditBill(bill);
+                  }
+                }}
+                className="flex w-full items-center gap-3 border-b border-gray-100 px-3.5 py-3 text-left last:border-b-0 transition-colors hover:bg-gray-50"
               >
                 <div
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-[13px]"
@@ -458,7 +472,7 @@ export function Dashboard() {
                     </div>
                   )}
                 </div>
-              </Link>
+              </button>
             ))}
             </div>
           ) : (
@@ -470,6 +484,27 @@ export function Dashboard() {
         </div>
       </div>
 
+      {editBill && (
+        <AddBillForm
+          initialData={{ name: editBill.name, category: editBill.category, amount: editBill.amount, frequency: editBill.frequency, nextDate: editBill.nextDate }}
+          onSubmit={(data) => {
+            updateBill(editBill.id, data);
+            setEditBill(null);
+          }}
+          onClose={() => setEditBill(null)}
+        />
+      )}
+
+      {editPlan && (
+        <AddPlanForm
+          initialData={{ name: editPlan.name, category: editPlan.category, amount: editPlan.amount, savedSoFar: editPlan.savedSoFar, targetDate: editPlan.targetDate, contributionAmount: editPlan.contributionAmount, contributionFrequency: editPlan.contributionFrequency }}
+          onSubmit={(data) => {
+            updatePlannedEvent(editPlan.id, data);
+            setEditPlan(null);
+          }}
+          onClose={() => setEditPlan(null)}
+        />
+      )}
     </div>
   );
 }
