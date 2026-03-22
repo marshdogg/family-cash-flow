@@ -3,12 +3,19 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { formatCurrency } from "@/lib/format";
 
+interface EventMarker {
+  name: string;
+  icon: string;
+  amount: number;
+}
+
 interface Period {
   label: string;
   income: number;
   expense: number;
   invested: number;
   balance: number;
+  plannedEventItems?: EventMarker[];
 }
 
 interface ProjectionChartProps {
@@ -75,7 +82,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
     if (!ctx) return;
     ctx.scale(dpr, dpr);
 
-    const PAD_TOP = 20;
+    const PAD_TOP = 48;
     const PAD_BOTTOM = 30;
     const PAD_LEFT = 52;
     const PAD_RIGHT = 8;
@@ -210,6 +217,49 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
       hitAreas.push({ x, y, radius: 20, period: periods[i], whatIfPeriod: whatIfPeriods?.[i], index: i });
     });
     hitAreasRef.current = hitAreas;
+
+    // Planned event markers
+    periods.forEach((p, i) => {
+      const events = p.plannedEventItems;
+      if (!events || events.length === 0) return;
+      const x = xScale(i);
+      const y = yScale(balances[i]);
+
+      // Draw a flag line down from the dot
+      ctx.strokeStyle = "#D97706";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 6);
+      ctx.lineTo(x, y - 28);
+      ctx.stroke();
+
+      // Draw a label pill
+      const label = events.length === 1
+        ? `${events[0].icon} ${events[0].name}`
+        : `${events[0].icon} ${events.length} events`;
+
+      ctx.font = "600 10px 'Plus Jakarta Sans', system-ui, sans-serif";
+      const textWidth = ctx.measureText(label).width;
+      const pillW = textWidth + 12;
+      const pillH = 18;
+      const pillX = Math.min(Math.max(x - pillW / 2, PAD_LEFT), width - PAD_RIGHT - pillW);
+      const pillY = y - 28 - pillH;
+
+      // Pill background
+      ctx.fillStyle = "#FFFBEB";
+      ctx.strokeStyle = "#F59E0B";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Pill text
+      ctx.fillStyle = "#92400E";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, pillX + pillW / 2, pillY + pillH / 2);
+    });
 
     // X-axis labels
     ctx.font = "500 10px 'Plus Jakarta Sans', system-ui, sans-serif";
@@ -374,6 +424,10 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodCli
             <div className="h-0.5 w-1.5 rounded-full bg-amber-400" />
           </div>
           Min ({formatCurrency(threshold)})
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-sm border border-amber-400 bg-amber-50" />
+          Planned Event
         </div>
       </div>
 
