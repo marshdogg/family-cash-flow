@@ -35,9 +35,8 @@ function toMonthly(amount: number, frequency: string): number {
 
 export default function AnalyticsPage() {
   const {
-    bills, income, investments, plannedEvents, checkIns,
-    totalMonthlyBills, totalMonthlyIncome, totalMonthlyInvestments,
-    totalMonthlySavingsNeeded, monthlyAvailableToSpend, loaded,
+    bills, income, plannedEvents, checkIns,
+    totalMonthlyBills, totalMonthlyIncome, loaded,
   } = useSharedStore();
 
   const [range, setRange] = useState<Range>("6M");
