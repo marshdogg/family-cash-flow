@@ -95,6 +95,14 @@ export default function PlansPage() {
             </div>
           )}
 
+          {/* Info banner */}
+          <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+            <span className="mt-px text-[14px]">💡</span>
+            <p className="text-[12px] font-medium leading-relaxed text-purple-700">
+              Plans are big upcoming expenses you&apos;re saving toward — vacations, tuition, home repairs. Track your progress and Runway will factor the monthly savings needed into your projection.
+            </p>
+          </div>
+
           <div className="overflow-hidden rounded-lg bg-white shadow-md">
             {plannedEvents.length === 0 ? (
               <div className="px-8 py-16 text-center">
