@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -20,17 +20,55 @@ const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
   other: { icon: "📋", bg: "#F3F4F6" },
 };
 
+function toMonthly(amount: number, frequency: string): number {
+  switch (frequency) {
+    case "weekly": return amount * (52 / 12);
+    case "biweekly": return amount * (26 / 12);
+    case "semimonthly": return amount * 2;
+    case "monthly": return amount;
+    case "quarterly": return amount / 3;
+    case "annually": return amount / 12;
+    default: return amount;
+  }
+}
+
 export default function IncomePage() {
   const { income, totalMonthlyIncome, addIncome, updateIncome, removeIncome, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<IncomeSource | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
-  if (!loaded) return null;
+  const recurring = useMemo(() => income.filter((i) => i.frequency !== "one-time"), [income]);
+  const oneTime = useMemo(() => income.filter((i) => i.frequency === "one-time"), [income]);
+  const totalOneTime = useMemo(() => oneTime.reduce((sum, i) => sum + i.amount, 0), [oneTime]);
 
-  const recurring = income.filter((i) => i.frequency !== "one-time");
-  const oneTime = income.filter((i) => i.frequency === "one-time");
-  const totalOneTime = oneTime.reduce((sum, i) => sum + i.amount, 0);
+  // YTD earnings estimate
+  const ytdEarnings = useMemo(() => {
+    const now = new Date();
+    const monthsElapsed = now.getMonth() + (now.getDate() / 30);
+    return Math.round(recurring.reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0) * monthsElapsed);
+  }, [recurring]);
+
+  const now = new Date();
+  const yearProgress = Math.round(((now.getMonth() * 30 + now.getDate()) / 365) * 100);
+  const projectedAnnual = Math.round(totalMonthlyIncome * 12);
+  const ytdLabel = `${yearProgress}% of year · ~${formatCurrency(projectedAnnual)} projected`;
+
+  // Top income categories for subtitle
+  const topCategories = useMemo(() => {
+    const cats = new Set(recurring.map((i) => i.category));
+    const labels: Record<string, string> = { paycheck: "Salary", bonus: "Bonus", side: "Freelance", benefits: "Benefits", refund: "Refund", other: "Other" };
+    return [...cats].slice(0, 3).map((c) => labels[c] ?? c).join(", ");
+  }, [recurring]);
+
+  // Next one-time income
+  const nextOneTime = useMemo(() => {
+    if (oneTime.length === 0) return null;
+    const sorted = [...oneTime].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+    return sorted[0];
+  }, [oneTime]);
+
+  if (!loaded) return null;
 
   return (
     <div className="flex min-h-screen">
@@ -57,23 +95,58 @@ export default function IncomePage() {
             </p>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-white p-4 shadow-md" title="Total of all recurring income sources, normalized to a monthly amount">
+          {/* Hero bar */}
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Monthly Recurring */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Total of all recurring income sources, normalized to a monthly amount">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-emerald-500" />
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Monthly Recurring</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-positive">
+              <p className="mt-1.5 font-mono text-[22px] font-semibold text-emerald-700">
                 +{formatCurrency(Math.round(totalMonthlyIncome))}
               </p>
-              <p className="mt-0.5 text-[11px] text-gray-400">{recurring.length} active sources</p>
+              <span className="mt-1.5 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
+                {recurring.length} active source{recurring.length !== 1 ? "s" : ""}
+              </span>
+              {topCategories && (
+                <p className="mt-1 text-[11px] text-gray-400">{topCategories}</p>
+              )}
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md" title="One-time income like bonuses or refunds that aren't recurring">
+
+            {/* YTD Earnings */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="Estimated total income earned year-to-date based on recurring sources">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-green-500" />
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">YTD Earnings</p>
+              <p className="mt-1.5 font-mono text-[22px] font-semibold text-green-700">
+                +{formatCurrency(ytdEarnings)}
+              </p>
+              <span className="mt-1.5 inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800">
+                on pace
+              </span>
+              <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-gray-100">
+                <div className="h-full rounded-full bg-green-500" style={{ width: `${yearProgress}%` }} />
+              </div>
+              <p className="mt-1 text-[11px] text-gray-400">{ytdLabel}</p>
+            </div>
+
+            {/* Upcoming One-Time */}
+            <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-md" title="One-time income like bonuses or refunds that aren't recurring">
+              <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-lg bg-amber-500" />
               <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Upcoming One-Time</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-blue-500">
+              <p className="mt-1.5 font-mono text-[22px] font-semibold text-amber-700">
                 +{formatCurrency(totalOneTime)}
               </p>
-              <p className="mt-0.5 text-[11px] text-gray-400">{oneTime.length} expected</p>
+              <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                {oneTime.length} expected
+              </span>
+              {nextOneTime && (
+                <p className="mt-1 text-[11px] text-gray-400">
+                  Next: {nextOneTime.name} {new Date(nextOneTime.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Income list */}
           <div className="overflow-hidden rounded-lg bg-white shadow-md">
             {income.length === 0 ? (
               <div className="px-8 py-16 text-center">
@@ -88,48 +161,102 @@ export default function IncomePage() {
                 </button>
               </div>
             ) : (
-              income.map((item) => {
-                const config = INCOME_ICONS[item.category] ?? INCOME_ICONS.other;
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => { setEditTarget(item); setShowForm(true); }}
-                    className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
-                  >
-                    <div
-                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
-                      style={{ background: config.bg }}
-                    >
-                      {config.icon}
+              <>
+                {/* Recurring section */}
+                {recurring.length > 0 && (
+                  <>
+                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      Recurring
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-gray-900">{item.name}</div>
-                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
-                        <span>{item.frequency}</span>
-                        <span>·</span>
-                        <span>Next: {new Date(item.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                      </div>
+                    {recurring.map((item) => {
+                      const config = INCOME_ICONS[item.category] ?? INCOME_ICONS.other;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => { setEditTarget(item); setShowForm(true); }}
+                          className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+                        >
+                          <div
+                            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
+                            style={{ background: config.bg }}
+                          >
+                            {config.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-semibold text-gray-900">{item.name}</div>
+                            <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
+                              <span>{item.frequency}</span>
+                              <span>·</span>
+                              <span>Next: {new Date(item.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                            </div>
+                          </div>
+                          <div className="font-mono text-[14px] font-semibold text-green-700">
+                            +{formatCurrency(item.amount)}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: item.id, name: item.name }); }}
+                            className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                            aria-label={`Delete ${item.name}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* One-time section */}
+                {oneTime.length > 0 && (
+                  <>
+                    <div className="border-b border-gray-100 bg-gray-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                      One-time
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono text-[14px] font-semibold text-positive">
-                        +{formatCurrency(item.amount)}
-                      </div>
-                      {item.status === "expected" && (
-                        <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-600">
-                          Expected
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: item.id, name: item.name }); }}
-                      className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                      aria-label={`Delete ${item.name}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                );
-              })
+                    {oneTime.map((item) => {
+                      const config = INCOME_ICONS[item.category] ?? INCOME_ICONS.other;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => { setEditTarget(item); setShowForm(true); }}
+                          className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+                        >
+                          <div
+                            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
+                            style={{ background: config.bg }}
+                          >
+                            {config.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-semibold text-gray-900">{item.name}</div>
+                            <div className="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400">
+                              <span>one-time</span>
+                              <span>·</span>
+                              <span>Next: {new Date(item.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-mono text-[14px] font-semibold text-green-700">
+                              +{formatCurrency(item.amount)}
+                            </div>
+                            {item.status === "expected" && (
+                              <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                                Expected
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: item.id, name: item.name }); }}
+                            className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                            aria-label={`Delete ${item.name}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>
