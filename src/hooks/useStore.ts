@@ -97,6 +97,14 @@ export function useStore() {
     if (data) setBills((prev) => [...prev, mapRow<Bill>(data)]);
   }, []);
 
+  const updateBill = useCallback(async (id: string, bill: Omit<Bill, "id" | "status">) => {
+    const { data } = await supabase.from("bills").update({
+      name: bill.name, category: bill.category, amount: bill.amount,
+      frequency: bill.frequency, next_date: bill.nextDate,
+    }).eq("id", id).select().single();
+    if (data) setBills((prev) => prev.map((b) => b.id === id ? mapRow<Bill>(data) : b));
+  }, []);
+
   const removeBill = useCallback(async (id: string) => {
     await supabase.from("bills").delete().eq("id", id);
     setBills((prev) => prev.filter((b) => b.id !== id));
@@ -111,6 +119,14 @@ export function useStore() {
     if (data) setIncome((prev) => [...prev, mapRow<IncomeSource>(data)]);
   }, []);
 
+  const updateIncome = useCallback(async (id: string, item: Omit<IncomeSource, "id">) => {
+    const { data } = await supabase.from("income_sources").update({
+      name: item.name, category: item.category, amount: item.amount,
+      frequency: item.frequency, next_date: item.nextDate, status: item.status,
+    }).eq("id", id).select().single();
+    if (data) setIncome((prev) => prev.map((i) => i.id === id ? mapRow<IncomeSource>(data) : i));
+  }, []);
+
   const removeIncome = useCallback(async (id: string) => {
     await supabase.from("income_sources").delete().eq("id", id);
     setIncome((prev) => prev.filter((i) => i.id !== id));
@@ -123,6 +139,14 @@ export function useStore() {
       frequency: inv.frequency, next_date: inv.nextDate, status: "active",
     });
     if (data) setInvestments((prev) => [...prev, mapRow<Investment>(data)]);
+  }, []);
+
+  const updateInvestment = useCallback(async (id: string, inv: Omit<Investment, "id" | "status">) => {
+    const { data } = await supabase.from("investments").update({
+      name: inv.name, category: inv.category, amount: inv.amount,
+      frequency: inv.frequency, next_date: inv.nextDate,
+    }).eq("id", id).select().single();
+    if (data) setInvestments((prev) => prev.map((i) => i.id === id ? mapRow<Investment>(data) : i));
   }, []);
 
   const removeInvestment = useCallback(async (id: string) => {
@@ -267,10 +291,13 @@ export function useStore() {
     totalMonthlySavingsNeeded,
     monthlyAvailableToSpend,
     addBill,
+    updateBill,
     removeBill,
     addIncome,
+    updateIncome,
     removeIncome,
     addInvestment,
+    updateInvestment,
     removeInvestment,
     addPlannedEvent,
     removePlannedEvent,

@@ -8,6 +8,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
+import type { IncomeSource } from "@/lib/types";
 
 const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
   paycheck: { icon: "💰", bg: "#DCFCE7" },
@@ -19,8 +20,9 @@ const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
 };
 
 export default function IncomePage() {
-  const { income, totalMonthlyIncome, addIncome, removeIncome, loaded } = useSharedStore();
+  const { income, totalMonthlyIncome, addIncome, updateIncome, removeIncome, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<IncomeSource | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
@@ -35,10 +37,10 @@ export default function IncomePage() {
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="text-[20px] font-bold text-gray-900">Income</h1>
+            <h1 className="text-[24px] font-bold text-gray-900">Income</h1>
             <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 rounded-md bg-purple-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
+              onClick={() => { setEditTarget(null); setShowForm(true); }}
+              className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               <Plus className="h-4 w-4" />
               Add Income
@@ -75,7 +77,8 @@ export default function IncomePage() {
                 return (
                   <div
                     key={item.id}
-                    className="group flex items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+                    onClick={() => { setEditTarget(item); setShowForm(true); }}
+                    className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
                   >
                     <div
                       className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-[16px]"
@@ -102,7 +105,7 @@ export default function IncomePage() {
                       )}
                     </div>
                     <button
-                      onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: item.id, name: item.name }); }}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       aria-label={`Delete ${item.name}`}
                     >
@@ -119,11 +122,17 @@ export default function IncomePage() {
 
       {showForm && (
         <AddIncomeForm
+          initialData={editTarget ? { name: editTarget.name, category: editTarget.category, amount: editTarget.amount, frequency: editTarget.frequency, nextDate: editTarget.nextDate, status: editTarget.status } : undefined}
           onSubmit={(data) => {
-            addIncome(data);
+            if (editTarget) {
+              updateIncome(editTarget.id, data);
+            } else {
+              addIncome(data);
+            }
             setShowForm(false);
+            setEditTarget(null);
           }}
-          onClose={() => setShowForm(false)}
+          onClose={() => { setShowForm(false); setEditTarget(null); }}
         />
       )}
 

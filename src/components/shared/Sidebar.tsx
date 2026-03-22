@@ -6,8 +6,8 @@ import { Home, Receipt, Wallet, TrendingUp, CalendarHeart, Settings } from "luci
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/income", label: "Income", icon: Wallet },
+  { href: "/bills", label: "Expenses", icon: Receipt },
   { href: "/investments", label: "Investments", icon: TrendingUp },
   { href: "/plans", label: "Plans & Events", icon: CalendarHeart },
   { href: "/settings", label: "Settings", icon: Settings },

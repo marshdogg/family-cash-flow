@@ -8,6 +8,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { formatCurrency } from "@/lib/format";
+import type { Investment } from "@/lib/types";
 
 const INVEST_ICONS: Record<string, { icon: string; bg: string }> = {
   rrsp: { icon: "📊", bg: "#F0EBFF" },
@@ -20,8 +21,9 @@ const INVEST_ICONS: Record<string, { icon: string; bg: string }> = {
 };
 
 export default function InvestmentsPage() {
-  const { investments, totalMonthlyInvestments, addInvestment, removeInvestment, loaded } = useSharedStore();
+  const { investments, totalMonthlyInvestments, addInvestment, updateInvestment, removeInvestment, loaded } = useSharedStore();
   const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<Investment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!loaded) return null;
@@ -36,10 +38,10 @@ export default function InvestmentsPage() {
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl lg:px-8">
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="text-[20px] font-bold text-gray-900">Investments</h1>
+            <h1 className="text-[24px] font-bold text-gray-900">Investments</h1>
             <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 rounded-md bg-purple-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
+              onClick={() => { setEditTarget(null); setShowForm(true); }}
+              className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               <Plus className="h-4 w-4" />
               Add Investment
@@ -84,7 +86,8 @@ export default function InvestmentsPage() {
                 return (
                   <div
                     key={inv.id}
-                    className="group flex items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
+                    onClick={() => { setEditTarget(inv); setShowForm(true); }}
+                    className="group flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3.5 last:border-b-0 hover:bg-gray-50"
                     style={inv.status === "paused" ? { opacity: 0.55 } : undefined}
                   >
                     <div
@@ -105,7 +108,7 @@ export default function InvestmentsPage() {
                       {formatCurrency(inv.amount)}
                     </div>
                     <button
-                      onClick={() => setDeleteTarget({ id: inv.id, name: inv.name })}
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: inv.id, name: inv.name }); }}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       aria-label={`Delete ${inv.name}`}
                     >
@@ -122,11 +125,17 @@ export default function InvestmentsPage() {
 
       {showForm && (
         <AddInvestmentForm
+          initialData={editTarget ? { name: editTarget.name, category: editTarget.category, amount: editTarget.amount, frequency: editTarget.frequency, nextDate: editTarget.nextDate } : undefined}
           onSubmit={(data) => {
-            addInvestment(data);
+            if (editTarget) {
+              updateInvestment(editTarget.id, data);
+            } else {
+              addInvestment(data);
+            }
             setShowForm(false);
+            setEditTarget(null);
           }}
-          onClose={() => setShowForm(false)}
+          onClose={() => { setShowForm(false); setEditTarget(null); }}
         />
       )}
 
