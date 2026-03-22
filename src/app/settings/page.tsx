@@ -44,9 +44,9 @@ export default function SettingsPage() {
   if (!loaded) return null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen overflow-x-hidden">
       <Sidebar />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="min-w-0 flex-1 overflow-x-hidden pb-20 lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-8">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-[20px] font-bold text-gray-900">Settings</h1>
@@ -82,7 +82,7 @@ export default function SettingsPage() {
                   type="text"
                   value={householdName}
                   onChange={(e) => setHouseholdName(e.target.value)}
-                  className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2.5 text-[14px] focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                  className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2 text-[16px] focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 />
               </div>
               <div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                     type="text"
                     value={threshold}
                     onChange={(e) => setThreshold(e.target.value.replace(/[^0-9]/g, ""))}
-                    className="flex-1 border-none px-3 py-2.5 font-mono text-[14px] outline-none"
+                    className="flex-1 border-none px-3 py-2 font-mono text-[16px] outline-none"
                   />
                 </div>
                 <p className="mt-1 text-[11px] text-gray-400">You&apos;ll see a warning when your projected balance drops below this amount.</p>

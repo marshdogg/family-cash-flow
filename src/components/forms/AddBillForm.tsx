@@ -61,9 +61,9 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
   };
 
   return (
-    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="bill-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center px-3 sm:items-center sm:px-4" role="dialog" aria-modal="true" aria-labelledby="bill-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 flex w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl max-h-[90vh] sm:rounded-xl">
+      <div className="relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-xl max-h-[85vh] sm:max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <h2 id="bill-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Expense" : "Add Expense"}</h2>
@@ -84,7 +84,7 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Electric Bill"
                 autoFocus
-                className={`mt-1 block w-full rounded-sm border px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.name ? "border-red-400" : "border-gray-200"}`}
+                className={`mt-1 block w-full rounded-sm border px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.name ? "border-red-400" : "border-gray-200"}`}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? "bill-name-error" : undefined}
               />
@@ -115,10 +115,10 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
 
             {/* Amount + Frequency */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="bill-amount" className="text-[12px] font-semibold text-gray-500">Amount</label>
                 <div className="mt-1 flex rounded-sm border border-gray-200 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20">
-                  <span className="border-r border-gray-200 bg-gray-50 px-2.5 py-2.5 font-mono text-[13px] text-gray-400" aria-hidden="true">$</span>
+                  <span className="flex-shrink-0 border-r border-gray-200 bg-gray-50 px-2.5 py-2.5 font-mono text-[13px] text-gray-400" aria-hidden="true">$</span>
                   <input
                     id="bill-amount"
                     type="number"
@@ -128,20 +128,20 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
                     onChange={(e) => setAmount(e.target.value)}
                     onWheel={(e) => e.currentTarget.blur()}
                     placeholder="0.00"
-                    className="flex-1 border-none px-3 py-2.5 text-[14px] outline-none"
+                    className="min-w-0 flex-1 border-none px-3 py-2 text-[16px] outline-none"
                     aria-invalid={!!errors.amount}
                     aria-describedby={errors.amount ? "bill-amount-error" : undefined}
                   />
                 </div>
                 {errors.amount && <p id="bill-amount-error" className="mt-1 text-[11px] text-red-500">{errors.amount}</p>}
               </div>
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="bill-frequency" className="text-[12px] font-semibold text-gray-500">Frequency</label>
                 <select
                   id="bill-frequency"
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="mt-1 block w-full truncate rounded-sm border border-gray-200 px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 >
                   {FREQUENCIES.map((f) => (
                     <option key={f.value} value={f.value}>{f.label}</option>
@@ -158,7 +158,7 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
                 type="date"
                 value={nextDate}
                 onChange={(e) => setNextDate(e.target.value)}
-                className={`mt-1 block w-full rounded-sm border px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.nextDate ? "border-red-400" : "border-gray-200"}`}
+                className={`mt-1 block w-full rounded-sm border px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.nextDate ? "border-red-400" : "border-gray-200"}`}
                 aria-invalid={!!errors.nextDate}
               />
             </div>

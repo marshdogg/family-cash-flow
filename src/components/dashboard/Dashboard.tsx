@@ -335,70 +335,71 @@ export function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
       {/* ── Metrics Strip ── */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-6">
-        <div>
-          <p className="text-[12px] font-medium text-gray-400">Balance</p>
-          <div className="mt-0.5 font-mono text-[28px] font-bold leading-none tracking-tight text-gray-900 sm:text-[36px]">
-            {formatCurrency(balance)}
+      <div className="border-b border-gray-200 pb-6">
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[12px] font-medium text-gray-400">Balance</p>
+            <div className="mt-0.5 font-mono text-[28px] font-bold leading-none tracking-tight text-gray-900 sm:text-[36px]">
+              {formatCurrency(balance)}
+            </div>
+            <p className="mt-1.5 text-[12px] text-gray-400">
+              Last check-in {lastCheckInLabel}
+              {streak > 0 && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
+                  <Flame className="h-3 w-3" /> {streak} wk streak
+                </span>
+              )}
+            </p>
           </div>
-          <p className="mt-1.5 text-[12px] text-gray-400">
-            Last check-in {lastCheckInLabel}
-            {streak > 0 && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
-                <Flame className="h-3 w-3" /> {streak} wk streak
-              </span>
-            )}
-          </p>
+          <Link
+            href="/check-in"
+            className="flex flex-shrink-0 items-center gap-2 rounded-lg bg-purple-500 px-4 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow sm:px-5"
+          >
+            <ClipboardCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Check-In</span>
+          </Link>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:gap-6">
           <div>
             <p className="text-[11px] font-medium text-gray-400">Income</p>
-            <p className="font-mono text-[16px] font-bold text-green-600 sm:text-[18px]">
+            <p className="font-mono text-[14px] font-bold text-green-600 sm:text-[18px]">
               +{formatCurrency(displayIncome)}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
             </p>
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-400">Expenses</p>
-            <p className="font-mono text-[16px] font-bold text-red-500 sm:text-[18px]">
+            <p className="font-mono text-[14px] font-bold text-red-500 sm:text-[18px]">
               −{formatCurrency(displayExpenses)}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
             </p>
           </div>
           {displayInvestments > 0 && (
             <div>
               <p className="text-[11px] font-medium text-gray-400">Investments</p>
-              <p className="font-mono text-[16px] font-bold text-purple-500 sm:text-[18px]">
+              <p className="font-mono text-[14px] font-bold text-purple-500 sm:text-[18px]">
                 −{formatCurrency(displayInvestments)}
-                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+                <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
               </p>
             </div>
           )}
           {displaySavings > 0 && (
             <div>
               <p className="text-[11px] font-medium text-gray-400">Plan Savings</p>
-              <p className="font-mono text-[16px] font-bold text-amber-500 sm:text-[18px]">
+              <p className="font-mono text-[14px] font-bold text-amber-500 sm:text-[18px]">
                 −{formatCurrency(displaySavings)}
-                <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+                <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
               </p>
             </div>
           )}
           <div>
             <p className="text-[11px] font-medium text-gray-400">Free Cash</p>
-            <p className={`font-mono text-[16px] font-bold sm:text-[18px] ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
+            <p className={`font-mono text-[14px] font-bold sm:text-[18px] ${displayAvailable >= 0 ? "text-green-600" : "text-red-500"}`}>
               {formatCurrency(Math.abs(displayAvailable))}
-              <span className="text-[11px] font-medium text-gray-300">{periodLabel}</span>
+              <span className="text-[10px] font-medium text-gray-300 sm:text-[11px]">{periodLabel}</span>
             </p>
           </div>
-
-          <Link
-            href="/check-in"
-            className="flex items-center gap-2 rounded-lg bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md transition-all hover:bg-purple-600 hover:shadow-glow"
-          >
-            <ClipboardCheck className="h-4 w-4" />
-            Check-In
-          </Link>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { StoreProvider } from "@/hooks/StoreProvider";
 import "./globals.css";
@@ -19,6 +19,12 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Runway — Family Finance Planner",
   description: "See where your money is going and whether you'll make it to next payday.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

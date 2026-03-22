@@ -71,9 +71,9 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
   };
 
   return (
-    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="income-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center px-3 sm:items-center sm:px-4" role="dialog" aria-modal="true" aria-labelledby="income-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 flex w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl max-h-[90vh] sm:rounded-xl">
+      <div className="relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-xl max-h-[85vh] sm:max-h-[90vh]">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <h2 id="income-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Income" : "Add Income"}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
@@ -92,7 +92,7 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Primary Salary"
                 autoFocus
-                className={`mt-1 block w-full rounded-sm border px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.name ? "border-red-400" : "border-gray-200"}`}
+                className={`mt-1 block w-full rounded-sm border px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.name ? "border-red-400" : "border-gray-200"}`}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? "income-name-error" : undefined}
               />
@@ -121,10 +121,10 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
             </fieldset>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="income-amount" className="text-[12px] font-semibold text-gray-500">Amount</label>
                 <div className="mt-1 flex rounded-sm border border-gray-200 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20">
-                  <span className="border-r border-gray-200 bg-gray-50 px-2.5 py-2.5 font-mono text-[13px] text-gray-400" aria-hidden="true">$</span>
+                  <span className="flex-shrink-0 border-r border-gray-200 bg-gray-50 px-2.5 py-2.5 font-mono text-[13px] text-gray-400" aria-hidden="true">$</span>
                   <input
                     id="income-amount"
                     type="number"
@@ -134,20 +134,20 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
                     onChange={(e) => setAmount(e.target.value)}
                     onWheel={(e) => e.currentTarget.blur()}
                     placeholder="0.00"
-                    className="flex-1 border-none px-3 py-2.5 text-[14px] outline-none"
+                    className="min-w-0 flex-1 border-none px-3 py-2 text-[16px] outline-none"
                     aria-invalid={!!errors.amount}
                     aria-describedby={errors.amount ? "income-amount-error" : undefined}
                   />
                 </div>
                 {errors.amount && <p id="income-amount-error" className="mt-1 text-[11px] text-red-500">{errors.amount}</p>}
               </div>
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="income-frequency" className="text-[12px] font-semibold text-gray-500">Frequency</label>
                 <select
                   id="income-frequency"
                   value={frequency}
                   onChange={(e) => handleFrequencyChange(e.target.value as Frequency)}
-                  className="mt-1 block w-full rounded-sm border border-gray-200 px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="mt-1 block w-full truncate rounded-sm border border-gray-200 px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 >
                   {FREQUENCIES.map((f) => (
                     <option key={f.value} value={f.value}>{f.label}</option>
@@ -165,7 +165,7 @@ export function AddIncomeForm({ onSubmit, onClose, initialData }: AddIncomeFormP
                 type="date"
                 value={nextDate}
                 onChange={(e) => setNextDate(e.target.value)}
-                className={`mt-1 block w-full rounded-sm border px-3 py-2.5 text-[14px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.nextDate ? "border-red-400" : "border-gray-200"}`}
+                className={`mt-1 block w-full rounded-sm border px-3 py-2 text-[16px] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 ${errors.nextDate ? "border-red-400" : "border-gray-200"}`}
                 aria-invalid={!!errors.nextDate}
               />
             </div>

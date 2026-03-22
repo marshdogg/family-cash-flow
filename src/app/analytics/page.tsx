@@ -183,9 +183,9 @@ export default function AnalyticsPage() {
   const hasData = bills.length > 0 || income.length > 0;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen overflow-x-hidden">
       <Sidebar />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="min-w-0 flex-1 overflow-x-hidden pb-20 lg:pb-0">
         <div className="mx-auto max-w-5xl px-4 py-8 lg:px-8">
           {/* Header */}
           <div className="mb-5 flex items-center justify-between">
