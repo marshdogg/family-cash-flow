@@ -60,7 +60,7 @@ export function AddInvestmentForm({ onSubmit, onClose, initialData }: AddInvestm
   return (
     <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="invest-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl">
+      <div className="relative z-10 flex w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl max-h-[90vh] sm:rounded-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <h2 id="invest-dialog-title" className="text-[16px] font-bold text-gray-900">{isEdit ? "Edit Investment" : "Add Investment"}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
@@ -69,7 +69,7 @@ export function AddInvestmentForm({ onSubmit, onClose, initialData }: AddInvestm
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 px-5 py-5">
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-5">
             <div>
               <label htmlFor="invest-name" className="text-[12px] font-semibold text-gray-500">Name</label>
               <input
