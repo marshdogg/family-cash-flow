@@ -61,7 +61,7 @@ export function AddBillForm({ onSubmit, onClose, initialData }: AddBillFormProps
   };
 
   return (
-    <div ref={trapRef} className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="bill-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="bill-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl">
         {/* Header */}

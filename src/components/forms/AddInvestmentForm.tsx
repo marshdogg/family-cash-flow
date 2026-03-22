@@ -58,7 +58,7 @@ export function AddInvestmentForm({ onSubmit, onClose, initialData }: AddInvestm
   };
 
   return (
-    <div ref={trapRef} className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="invest-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+    <div ref={trapRef} className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="invest-dialog-title" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
