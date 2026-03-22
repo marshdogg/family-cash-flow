@@ -94,23 +94,23 @@ function PlansPage() {
           </div>
 
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg bg-white p-4 shadow-md">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Planned</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-purple-500">
+            <div className="rounded-lg border-l-[3px] border-l-purple-500 bg-white p-4 shadow-md">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Planned</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(Math.round(totalPlanned))}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">{plannedEvents.length} events</p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Saved</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-green-500">
+            <div className="rounded-lg border-l-[3px] border-l-green-500 bg-white p-4 shadow-md">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Saved</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(Math.round(totalSaved))}
               </p>
-              <p className="mt-0.5 text-[11px] text-gray-400">{Math.round(overallProgress)}% funded</p>
+              <p className="mt-0.5 text-[11px] text-green-600">{Math.round(overallProgress)}% funded</p>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-md">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Remaining</p>
-              <p className="mt-1 font-mono text-[22px] font-semibold text-orange-500">
+            <div className="rounded-lg border-l-[3px] border-l-amber-500 bg-white p-4 shadow-md">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Remaining</p>
+              <p className="mt-1 font-mono text-[20px] font-semibold text-gray-900">
                 {formatCurrency(Math.round(remaining))}
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400">still needed</p>
