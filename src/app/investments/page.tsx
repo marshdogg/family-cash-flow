@@ -79,6 +79,12 @@ export default function InvestmentsPage() {
                 <div className="text-[36px]">📈</div>
                 <h2 className="mt-3 text-[17px] font-bold text-gray-900">No investments yet</h2>
                 <p className="mt-1 text-[13px] text-gray-500">Track your RRSP, TFSA, brokerage contributions and lump-sum investments.</p>
+                <button
+                  onClick={() => { setEditTarget(null); setShowForm(true); }}
+                  className="mt-4 rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
+                >
+                  Add Your First Investment
+                </button>
               </div>
             ) : (
               investments.map((inv) => {

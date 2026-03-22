@@ -111,6 +111,12 @@ export default function PlansPage() {
                 <div className="text-[36px]">{"\uD83D\uDCC5"}</div>
                 <h2 className="mt-3 text-[17px] font-bold text-gray-900">No planned events yet</h2>
                 <p className="mt-1 text-[13px] text-gray-500">Track upcoming trips, camps, seasonal expenses, and other big-ticket items.</p>
+                <button
+                  onClick={() => { setEditTarget(null); setShowForm(true); }}
+                  className="mt-4 rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
+                >
+                  Add Your First Plan
+                </button>
               </div>
             ) : (
               plannedEvents.map((event) => {

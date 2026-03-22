@@ -121,7 +121,13 @@ export default function BillsPage() {
               <div className="px-8 py-16 text-center">
                 <div className="text-[36px]">📋</div>
                 <h2 className="mt-3 text-[17px] font-bold text-gray-900">No expenses yet</h2>
-                <p className="mt-1 text-[13px] text-gray-500">Add your recurring expenses to start tracking.</p>
+                <p className="mt-1 text-[13px] text-gray-500">Add your recurring expenses so Runway can project your cash flow.</p>
+                <button
+                  onClick={() => { setEditTarget(null); setShowForm(true); }}
+                  className="mt-4 rounded-md bg-purple-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-md hover:bg-purple-600"
+                >
+                  Add Your First Expense
+                </button>
               </div>
             ) : (
               bills.map((bill) => {

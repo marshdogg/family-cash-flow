@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { Sparkles, Flame, ClipboardCheck } from "lucide-react";
+import { Sparkles, Flame, ClipboardCheck, Check, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ProjectionChart } from "./ProjectionChart";
 import { PeriodDetail } from "./PeriodDetail";
@@ -314,22 +314,100 @@ export function Dashboard() {
             ))}
             </div>
           ) : (
-            <p className="py-8 text-center text-[12px] text-gray-400">
-              No upcoming expenses
-            </p>
+            <div className="px-4 py-8 text-center">
+              <p className="text-[12px] text-gray-400">No upcoming items</p>
+              <p className="mt-1 text-[11px] text-gray-300">Add expenses and plans to see what&apos;s coming up</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* ── First-time prompt ── */}
-      {!latestCheckIn && (
-        <div className="mt-8 rounded-xl border-2 border-dashed border-purple-200 bg-purple-50/50 px-6 py-10 text-center">
-          <h3 className="text-[16px] font-bold text-gray-900">Welcome! Start with a check-in</h3>
-          <p className="mx-auto mt-2 max-w-sm text-[13px] text-gray-500">
-            Complete your first weekly check-in to see your cash flow projection and get started.
-          </p>
-        </div>
-      )}
+      {/* ── Setup Checklist (first-time users) ── */}
+      {(() => {
+        const hasIncome = income.length > 0;
+        const hasExpenses = bills.length > 0;
+        const hasCheckIn = !!latestCheckIn;
+        const stepsComplete = [hasIncome, hasExpenses, hasCheckIn].filter(Boolean).length;
+        const allDone = stepsComplete === 3;
+
+        if (allDone) return null;
+
+        const steps = [
+          {
+            done: hasIncome,
+            title: "Add your income",
+            description: "Paychecks, side income, and other sources",
+            href: "/income",
+          },
+          {
+            done: hasExpenses,
+            title: "Add your expenses",
+            description: "Rent, utilities, subscriptions, groceries",
+            href: "/bills",
+          },
+          {
+            done: hasCheckIn,
+            title: "Complete your first check-in",
+            description: "Enter your bank balance to see your projection",
+            href: "/check-in",
+          },
+        ];
+
+        return (
+          <div className="mt-6 rounded-xl border border-purple-200 bg-white p-5 shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-[15px] font-bold text-gray-900">Get started with Runway</h3>
+                <p className="mt-0.5 text-[12px] text-gray-400">
+                  {stepsComplete} of 3 complete — add your data to unlock your cash flow projection
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50 font-mono text-[13px] font-bold text-purple-500">
+                {stepsComplete}/3
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-100">
+              <div
+                className="h-full rounded-full bg-purple-500 transition-all"
+                style={{ width: `${(stepsComplete / 3) * 100}%` }}
+              />
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {steps.map((step, i) => (
+                <Link
+                  key={i}
+                  href={step.href}
+                  className={`flex items-center gap-3 rounded-lg px-3.5 py-3 transition-colors ${
+                    step.done
+                      ? "bg-green-50"
+                      : "bg-gray-50 hover:bg-purple-50"
+                  }`}
+                >
+                  <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
+                    step.done
+                      ? "bg-green-500 text-white"
+                      : "border-2 border-gray-300 text-gray-300"
+                  }`}>
+                    {step.done ? <Check className="h-3.5 w-3.5" /> : <span className="text-[11px] font-bold">{i + 1}</span>}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className={`text-[13px] font-semibold ${step.done ? "text-green-700 line-through" : "text-gray-900"}`}>
+                      {step.title}
+                    </div>
+                    <div className={`mt-0.5 text-[11px] ${step.done ? "text-green-500" : "text-gray-400"}`}>
+                      {step.done ? "Done" : step.description}
+                    </div>
+                  </div>
+                  {!step.done && <ArrowRight className="h-4 w-4 text-gray-300" />}
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
