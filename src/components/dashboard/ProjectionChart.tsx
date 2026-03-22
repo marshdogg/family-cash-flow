@@ -22,6 +22,7 @@ interface HitArea {
   y: number;
   radius: number;
   period: Period;
+  whatIfPeriod?: Period;
   index: number;
 }
 
@@ -180,7 +181,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold }: Projectio
         ctx.fillStyle = "rgba(123, 47, 255, 0.15)";
         ctx.fill();
       }
-      hitAreas.push({ x, y, radius: 20, period: periods[i], index: i });
+      hitAreas.push({ x, y, radius: 20, period: periods[i], whatIfPeriod: whatIfPeriods?.[i], index: i });
     });
     hitAreasRef.current = hitAreas;
 
@@ -225,40 +226,48 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold }: Projectio
 
       if (closest) {
         const p = closest.period;
+        const w = closest.whatIfPeriod;
         const net = p.income - p.expense - p.invested;
         tooltip.style.display = "block";
         tooltip.style.left = clientX + 16 + "px";
         tooltip.style.top = clientY - 16 + "px";
         canvas.style.cursor = "pointer";
 
-        const investedRow = p.invested > 0 ? `
-          <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
-            <span style="color:rgba(255,255,255,0.6);">Invested</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#C4B5FD;">−${formatCurrency(p.invested)}</span>
-          </div>` : '';
+        const mono = "font-family:'JetBrains Mono',monospace;font-weight:600;";
+        const row = (label: string, value: string, color: string) =>
+          `<div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
+            <span style="color:rgba(255,255,255,0.6);">${label}</span>
+            <span style="${mono}color:${color};">${value}</span>
+          </div>`;
+        const divider = `<div style="height:1px;background:rgba(255,255,255,0.1);margin:6px 0;"></div>`;
 
-        tooltip.innerHTML = `
-          <div style="font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${p.label}</div>
-          <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
-            <span style="color:rgba(255,255,255,0.6);">Balance</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${p.balance < threshold ? '#FCA5A5' : '#C4B5FD'};">${formatCurrency(p.balance)}</span>
-          </div>
-          <div style="height:1px;background:rgba(255,255,255,0.1);margin:6px 0;"></div>
-          <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
-            <span style="color:rgba(255,255,255,0.6);">Inflows</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#86EFAC;">+${formatCurrency(p.income)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
-            <span style="color:rgba(255,255,255,0.6);">Outflows</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#FCA5A5;">−${formatCurrency(p.expense)}</span>
-          </div>
-          ${investedRow}
-          <div style="height:1px;background:rgba(255,255,255,0.1);margin:6px 0;"></div>
-          <div style="display:flex;justify-content:space-between;gap:20px;">
-            <span style="color:rgba(255,255,255,0.6);">Net</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${net >= 0 ? '#86EFAC' : '#FCA5A5'};">${net >= 0 ? '+' : '−'}${formatCurrency(Math.abs(net))}</span>
-          </div>
-        `;
+        let html = `<div style="font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${p.label}</div>`;
+        html += row("Balance", formatCurrency(p.balance), p.balance < threshold ? '#FCA5A5' : '#C4B5FD');
+
+        // What-if balance comparison
+        if (w) {
+          const diff = w.balance - p.balance;
+          html += row(
+            "What If",
+            formatCurrency(w.balance),
+            w.balance < threshold ? '#FCA5A5' : '#FCD34D'
+          );
+          html += `<div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:4px;">
+            <span style="color:rgba(255,255,255,0.4);font-size:11px;">Difference</span>
+            <span style="${mono}font-size:11px;color:${diff >= 0 ? '#86EFAC' : '#FCA5A5'};">${diff >= 0 ? '+' : '−'}${formatCurrency(Math.abs(diff))}</span>
+          </div>`;
+        }
+
+        html += divider;
+        html += row("Inflows", "+" + formatCurrency(p.income), "#86EFAC");
+        html += row("Outflows", "−" + formatCurrency(p.expense), "#FCA5A5");
+        if (p.invested > 0) {
+          html += row("Invested", "−" + formatCurrency(p.invested), "#C4B5FD");
+        }
+        html += divider;
+        html += row("Net", (net >= 0 ? '+' : '−') + formatCurrency(Math.abs(net)), net >= 0 ? '#86EFAC' : '#FCA5A5');
+
+        tooltip.innerHTML = html;
       } else {
         tooltip.style.display = "none";
         canvas.style.cursor = "default";
