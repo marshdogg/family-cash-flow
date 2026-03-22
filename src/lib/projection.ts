@@ -2,12 +2,22 @@ import type { Bill, IncomeSource, Investment, PlannedEvent } from "./types";
 
 export type ViewMode = "weekly" | "biweekly" | "monthly";
 
+export interface LineItem {
+  name: string;
+  icon: string;
+  amount: number;
+}
+
 export interface ProjectionPeriod {
   label: string;
   income: number;
   expense: number;
   invested: number;
   balance: number;
+  incomeItems: LineItem[];
+  expenseItems: LineItem[];
+  investmentItems: LineItem[];
+  plannedEventItems: LineItem[];
 }
 
 /**
@@ -35,6 +45,20 @@ function sumOneTimeInPeriod(items: OneTimeItem[], start: Date, end: Date): numbe
   }
   return total;
 }
+
+const BILL_ICONS: Record<string, string> = {
+  housing: "🏠", utilities: "⚡", insurance: "🛡", transport: "🚗",
+  groceries: "🛒", childcare: "👶", subscriptions: "📱", loan: "🏦", other: "📋",
+};
+const INCOME_ICONS: Record<string, string> = {
+  paycheck: "💰", bonus: "🎉", side: "💼", benefits: "🏛", refund: "📥", other: "📋",
+};
+const INVEST_ICONS: Record<string, string> = {
+  rrsp: "📊", tfsa: "🛡", resp: "🎓", brokerage: "📈", realestate: "🏘", crypto: "₿", other: "💎",
+};
+const EVENT_ICONS: Record<string, string> = {
+  trip: "✈️", camp: "⛺", holiday: "🎄", school: "🎒", car: "🚗", home: "🏠", medical: "🏥", other: "📋",
+};
 
 /**
  * Build 12 projection periods for the given view mode.
@@ -107,12 +131,40 @@ export function buildProjection(
 
     running += periodIncome - periodExpense - periodInvested;
 
+    // Build line items for this period
+    const incomeItems: LineItem[] = [
+      ...activeIncome.map((i) => ({ name: i.name, icon: INCOME_ICONS[i.category] || "📋", amount: Math.round(toDailyRate(i.amount, i.frequency) * days) })),
+      ...oneTimeIncome.filter((i) => { const d = new Date(i.nextDate + "T00:00:00"); return d >= periodStart && d <= periodEnd; })
+        .map((i) => ({ name: i.name, icon: INCOME_ICONS[i.category] || "📋", amount: i.amount })),
+    ].filter((i) => i.amount > 0);
+
+    const expenseItems: LineItem[] = [
+      ...activeBills.map((b) => ({ name: b.name, icon: BILL_ICONS[b.category] || "📋", amount: Math.round(toDailyRate(b.amount, b.frequency) * days) })),
+      ...oneTimeBills.filter((b) => { const d = new Date(b.nextDate + "T00:00:00"); return d >= periodStart && d <= periodEnd; })
+        .map((b) => ({ name: b.name, icon: BILL_ICONS[(b as Bill).category] || "📋", amount: b.amount })),
+    ].filter((i) => i.amount > 0).sort((a, b) => b.amount - a.amount);
+
+    const investmentItems: LineItem[] = [
+      ...activeInvestments.map((i) => ({ name: i.name, icon: INVEST_ICONS[i.category] || "💎", amount: Math.round(toDailyRate(i.amount, i.frequency) * days) })),
+      ...oneTimeInvestments.filter((i) => { const d = new Date(i.nextDate + "T00:00:00"); return d >= periodStart && d <= periodEnd; })
+        .map((i) => ({ name: i.name, icon: INVEST_ICONS[(i as Investment).category] || "💎", amount: i.amount })),
+    ].filter((i) => i.amount > 0);
+
+    const plannedEventItems: LineItem[] = plannedEvents
+      .filter((e) => e.status !== "spent")
+      .filter((e) => { const d = new Date(e.targetDate + "T00:00:00"); return d >= periodStart && d <= periodEnd; })
+      .map((e) => ({ name: e.name, icon: EVENT_ICONS[e.category] || "📋", amount: e.amount }));
+
     periods.push({
       label,
       income: periodIncome,
       expense: periodExpense,
       invested: periodInvested,
       balance: Math.round(running),
+      incomeItems,
+      expenseItems,
+      investmentItems,
+      plannedEventItems,
     });
   }
 

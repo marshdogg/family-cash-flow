@@ -6,6 +6,7 @@ import { BalanceHero } from "./BalanceHero";
 import { ProjectionChart } from "./ProjectionChart";
 import { UpcomingBills } from "./UpcomingBills";
 import { QuickActions } from "./QuickActions";
+import { PeriodDetail } from "./PeriodDetail";
 import { WhatIfPanel } from "./WhatIfPanel";
 import type { WhatIfItem } from "./WhatIfPanel";
 import { useSharedStore } from "@/hooks/StoreProvider";
@@ -23,6 +24,7 @@ export function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
 
   const balance = latestCheckIn?.bankBalance ?? 0;
   const weeklyExpenses = totalMonthlyBills / (52 / 12);
@@ -137,7 +139,22 @@ export function Dashboard() {
           </div>
         </div>
 
-        <ProjectionChart periods={periods} whatIfPeriods={whatIfPeriods} threshold={settings.threshold} />
+        <ProjectionChart
+          periods={periods}
+          whatIfPeriods={whatIfPeriods}
+          threshold={settings.threshold}
+          selectedIndex={selectedPeriod}
+          onPeriodClick={(i) => setSelectedPeriod(selectedPeriod === i ? null : i)}
+        />
+
+        {selectedPeriod !== null && periods[selectedPeriod] && (
+          <PeriodDetail
+            period={periods[selectedPeriod]}
+            whatIfPeriod={whatIfPeriods?.[selectedPeriod]}
+            threshold={settings.threshold}
+            onClose={() => setSelectedPeriod(null)}
+          />
+        )}
 
         {whatIfOpen && (
           <div className="mt-4">

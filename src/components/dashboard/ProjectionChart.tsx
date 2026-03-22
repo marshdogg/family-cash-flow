@@ -15,6 +15,8 @@ interface ProjectionChartProps {
   periods: Period[];
   whatIfPeriods?: Period[];
   threshold: number;
+  onPeriodClick?: (index: number) => void;
+  selectedIndex?: number | null;
 }
 
 interface HitArea {
@@ -26,7 +28,7 @@ interface HitArea {
   index: number;
 }
 
-export function ProjectionChart({ periods, whatIfPeriods, threshold }: ProjectionChartProps) {
+export function ProjectionChart({ periods, whatIfPeriods, threshold, onPeriodClick, selectedIndex }: ProjectionChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -175,10 +177,10 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold }: Projectio
       ctx.arc(x, y, i === 0 ? 4 : 3, 0, Math.PI * 2);
       ctx.fillStyle = bal < threshold ? "#EF4444" : (i === 0 ? "#7B2FFF" : "#4A9BFF");
       ctx.fill();
-      if (i === 0) {
+      if (i === 0 || i === selectedIndex) {
         ctx.beginPath();
-        ctx.arc(x, y, 7, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(123, 47, 255, 0.15)";
+        ctx.arc(x, y, i === selectedIndex ? 9 : 7, 0, Math.PI * 2);
+        ctx.fillStyle = i === selectedIndex ? "rgba(123, 47, 255, 0.25)" : "rgba(123, 47, 255, 0.15)";
         ctx.fill();
       }
       hitAreas.push({ x, y, radius: 20, period: periods[i], whatIfPeriod: whatIfPeriods?.[i], index: i });
@@ -281,6 +283,23 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold }: Projectio
     if (tooltip) tooltip.style.display = "none";
   }, []);
 
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onPeriodClick) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    for (const area of hitAreasRef.current) {
+      const dist = Math.sqrt((mx - area.x) ** 2 + (my - area.y) ** 2);
+      if (dist < area.radius) {
+        onPeriodClick(area.index);
+        return;
+      }
+    }
+  }, [onPeriodClick]);
+
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
@@ -317,6 +336,7 @@ export function ProjectionChart({ periods, whatIfPeriods, threshold }: Projectio
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
+          onClick={handleClick}
           className="block w-full"
           role="img"
           aria-label={`Cash flow projection chart. Current balance: ${formatCurrency(periods[0]?.balance ?? 0)}`}
