@@ -8,12 +8,14 @@ import { PeriodDetail } from "./PeriodDetail";
 import { WhatIfPanel } from "./WhatIfPanel";
 import type { WhatIfItem } from "./WhatIfPanel";
 import { AddBillForm } from "@/components/forms/AddBillForm";
+import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
+import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { AddPlanForm } from "@/components/forms/AddPlanForm";
 import { useSharedStore } from "@/hooks/StoreProvider";
 import { buildProjection, buildWhatIfProjection } from "@/lib/projection";
 import { formatCurrency } from "@/lib/format";
 import type { ViewMode } from "@/lib/projection";
-import type { Bill, PlannedEvent } from "@/lib/types";
+import type { Bill, IncomeSource, Investment, PlannedEvent } from "@/lib/types";
 
 const VIEW_OPTIONS: { value: ViewMode; label: string; full: string }[] = [
   { value: "weekly", label: "W", full: "Weekly" },
@@ -37,6 +39,25 @@ const EVENT_ICONS: Record<string, string> = {
   trip: "✈️", camp: "⛺", holiday: "🎄", school: "🎒", car: "🚗", home: "🏠", medical: "🏥", other: "📋",
 };
 
+const INCOME_ICONS: Record<string, { icon: string; bg: string }> = {
+  paycheck: { icon: "💰", bg: "#DCFCE7" },
+  bonus: { icon: "🎉", bg: "#FEF3C7" },
+  side: { icon: "💼", bg: "#F0EBFF" },
+  benefits: { icon: "🏛", bg: "#E8F2FF" },
+  refund: { icon: "📥", bg: "#FCE7F3" },
+  other: { icon: "📋", bg: "#F3F4F6" },
+};
+
+const INVEST_ICONS: Record<string, { icon: string; bg: string }> = {
+  rrsp: { icon: "📊", bg: "#F0EBFF" },
+  tfsa: { icon: "🛡", bg: "#E8F2FF" },
+  resp: { icon: "🎓", bg: "#FEF3C7" },
+  brokerage: { icon: "📈", bg: "#DCFCE7" },
+  realestate: { icon: "🏘", bg: "#FCE7F3" },
+  crypto: { icon: "₿", bg: "#FEF3C7" },
+  other: { icon: "💎", bg: "#F3F4F6" },
+};
+
 export function Dashboard() {
   const store = useSharedStore();
   const [previewEmpty, setPreviewEmpty] = useState(false);
@@ -47,7 +68,7 @@ export function Dashboard() {
     }
   }, []);
 
-  const { bills: realBills, income: realIncome, investments: realInvestments, plannedEvents: realPlannedEvents, latestCheckIn: realLatestCheckIn, totalMonthlyBills: realTotalMonthlyBills, totalMonthlyIncome: realTotalMonthlyIncome, totalMonthlyInvestments: realTotalMonthlyInvestments, totalMonthlySavingsNeeded: realTotalMonthlySavingsNeeded, monthlyAvailableToSpend: realMonthlyAvailableToSpend, checkIns: realCheckIns, updateBill, updatePlannedEvent, settings, loaded } = store;
+  const { bills: realBills, income: realIncome, investments: realInvestments, plannedEvents: realPlannedEvents, latestCheckIn: realLatestCheckIn, totalMonthlyBills: realTotalMonthlyBills, totalMonthlyIncome: realTotalMonthlyIncome, totalMonthlyInvestments: realTotalMonthlyInvestments, totalMonthlySavingsNeeded: realTotalMonthlySavingsNeeded, monthlyAvailableToSpend: realMonthlyAvailableToSpend, checkIns: realCheckIns, updateBill, updateIncome, updateInvestment, updatePlannedEvent, settings, loaded } = store;
 
   const bills = previewEmpty ? [] : realBills;
   const income = previewEmpty ? [] : realIncome;
@@ -66,6 +87,8 @@ export function Dashboard() {
   const [whatIfItems, setWhatIfItems] = useState<WhatIfItem[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
   const [editBill, setEditBill] = useState<Bill | null>(null);
+  const [editIncome, setEditIncome] = useState<IncomeSource | null>(null);
+  const [editInvestment, setEditInvestment] = useState<Investment | null>(null);
   const [editPlan, setEditPlan] = useState<PlannedEvent | null>(null);
 
   const balance = latestCheckIn?.bankBalance ?? 0;
@@ -124,13 +147,13 @@ export function Dashboard() {
     setWhatIfItems((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Upcoming: bills in next 30 days + planned events in next 90 days, merged and sorted by date
+  // Upcoming: all cash flow items in the next 30 days + planned events in 90 days, sorted by date
   const activityFeed = useMemo(() => {
-    const billCutoff = Date.now() + 30 * 24 * 60 * 60 * 1000;
-    const eventCutoff = Date.now() + 90 * 24 * 60 * 60 * 1000;
+    const cutoff30 = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const cutoff90 = Date.now() + 90 * 24 * 60 * 60 * 1000;
 
     const billItems = bills
-      .filter((b) => b.status === "active" && new Date(b.nextDate + "T00:00:00").getTime() <= billCutoff)
+      .filter((b) => b.status === "active" && new Date(b.nextDate + "T00:00:00").getTime() <= cutoff30)
       .map((b) => ({
         type: "bill" as const,
         id: b.id,
@@ -142,8 +165,34 @@ export function Dashboard() {
         bg: BILL_ICONS[b.category]?.bg ?? "#F3F4F6",
       }));
 
+    const incomeItems = income
+      .filter((i) => i.frequency !== "one-time" && new Date(i.nextDate + "T00:00:00").getTime() <= cutoff30)
+      .map((i) => ({
+        type: "income" as const,
+        id: i.id,
+        name: i.name,
+        amount: i.amount,
+        date: i.nextDate,
+        dateLabel: new Date(i.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        icon: INCOME_ICONS[i.category]?.icon ?? "📋",
+        bg: INCOME_ICONS[i.category]?.bg ?? "#F3F4F6",
+      }));
+
+    const investmentItems = investments
+      .filter((i) => i.frequency !== "one-time" && i.status === "active" && new Date(i.nextDate + "T00:00:00").getTime() <= cutoff30)
+      .map((i) => ({
+        type: "investment" as const,
+        id: i.id,
+        name: i.name,
+        amount: i.amount,
+        date: i.nextDate,
+        dateLabel: new Date(i.nextDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        icon: INVEST_ICONS[i.category]?.icon ?? "💎",
+        bg: INVEST_ICONS[i.category]?.bg ?? "#F3F4F6",
+      }));
+
     const eventItems = plannedEvents
-      .filter((e) => e.status !== "spent" && new Date(e.targetDate + "T00:00:00").getTime() <= eventCutoff)
+      .filter((e) => e.status !== "spent" && new Date(e.targetDate + "T00:00:00").getTime() <= cutoff90)
       .map((e) => ({
         type: "event" as const,
         id: e.id,
@@ -157,10 +206,10 @@ export function Dashboard() {
         progress: Math.round((e.savedSoFar / e.amount) * 100),
       }));
 
-    return [...billItems, ...eventItems]
+    return [...billItems, ...incomeItems, ...investmentItems, ...eventItems]
       .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, 8);
-  }, [bills, plannedEvents]);
+      .slice(0, 10);
+  }, [bills, income, investments, plannedEvents]);
 
   const streak = checkIns.length;
 
@@ -436,6 +485,12 @@ export function Dashboard() {
                   if (item.type === "event") {
                     const plan = plannedEvents.find((e) => e.id === item.id);
                     if (plan) setEditPlan(plan);
+                  } else if (item.type === "income") {
+                    const inc = income.find((i) => i.id === item.id);
+                    if (inc) setEditIncome(inc);
+                  } else if (item.type === "investment") {
+                    const inv = investments.find((i) => i.id === item.id);
+                    if (inv) setEditInvestment(inv);
                   } else {
                     const bill = bills.find((b) => b.id === item.id);
                     if (bill) setEditBill(bill);
@@ -466,6 +521,14 @@ export function Dashboard() {
                         />
                       </div>
                     </div>
+                  ) : item.type === "income" ? (
+                    <div className="font-mono text-[12px] font-semibold text-green-600">
+                      +{formatCurrency(item.amount)}
+                    </div>
+                  ) : item.type === "investment" ? (
+                    <div className="font-mono text-[12px] font-semibold text-purple-500">
+                      −{formatCurrency(item.amount)}
+                    </div>
                   ) : (
                     <div className="font-mono text-[12px] font-semibold text-gray-700">
                       −{formatCurrency(item.amount)}
@@ -492,6 +555,28 @@ export function Dashboard() {
             setEditBill(null);
           }}
           onClose={() => setEditBill(null)}
+        />
+      )}
+
+      {editIncome && (
+        <AddIncomeForm
+          initialData={{ name: editIncome.name, category: editIncome.category, amount: editIncome.amount, frequency: editIncome.frequency, nextDate: editIncome.nextDate, status: editIncome.status }}
+          onSubmit={(data) => {
+            updateIncome(editIncome.id, data);
+            setEditIncome(null);
+          }}
+          onClose={() => setEditIncome(null)}
+        />
+      )}
+
+      {editInvestment && (
+        <AddInvestmentForm
+          initialData={{ name: editInvestment.name, category: editInvestment.category, amount: editInvestment.amount, frequency: editInvestment.frequency, nextDate: editInvestment.nextDate }}
+          onSubmit={(data) => {
+            updateInvestment(editInvestment.id, data);
+            setEditInvestment(null);
+          }}
+          onClose={() => setEditInvestment(null)}
         />
       )}
 
