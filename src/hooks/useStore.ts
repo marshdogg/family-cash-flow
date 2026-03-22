@@ -182,25 +182,22 @@ export function useStore() {
   const latestCheckIn = checkIns.length > 0 ? checkIns[checkIns.length - 1] : null;
 
   // ── Computed ──
+  const toMonthly = (amount: number, frequency: string) => {
+    if (frequency === "weekly") return amount * (52 / 12);       // 4.333
+    if (frequency === "biweekly") return amount * (26 / 12);     // 2.167
+    if (frequency === "semimonthly") return amount * 2;           // exactly 2x/month
+    if (frequency === "quarterly") return amount / 3;
+    if (frequency === "annually") return amount / 12;
+    return amount; // monthly
+  };
+
   const totalMonthlyBills = bills
     .filter((b) => b.status === "active")
-    .reduce((sum, b) => {
-      if (b.frequency === "weekly") return sum + b.amount * 4.33;
-      if (b.frequency === "biweekly") return sum + b.amount * 2.17;
-      if (b.frequency === "quarterly") return sum + b.amount / 3;
-      if (b.frequency === "annually") return sum + b.amount / 12;
-      return sum + b.amount;
-    }, 0);
+    .reduce((sum, b) => sum + toMonthly(b.amount, b.frequency), 0);
 
   const totalMonthlyIncome = income
     .filter((i) => i.frequency !== "one-time")
-    .reduce((sum, i) => {
-      if (i.frequency === "weekly") return sum + i.amount * 4.33;
-      if (i.frequency === "biweekly") return sum + i.amount * 2.17;
-      if (i.frequency === "quarterly") return sum + i.amount / 3;
-      if (i.frequency === "annually") return sum + i.amount / 12;
-      return sum + i.amount;
-    }, 0);
+    .reduce((sum, i) => sum + toMonthly(i.amount, i.frequency), 0);
 
   return {
     loaded,

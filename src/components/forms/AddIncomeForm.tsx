@@ -15,7 +15,8 @@ const CATEGORIES: { value: IncomeCategory; label: string; icon: string }[] = [
 
 const FREQUENCIES: { value: Frequency; label: string }[] = [
   { value: "weekly", label: "Weekly" },
-  { value: "biweekly", label: "Biweekly" },
+  { value: "biweekly", label: "Biweekly (every 2 weeks)" },
+  { value: "semimonthly", label: "Semi-monthly (1st & 15th)" },
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
   { value: "annually", label: "Annually" },

@@ -1,6 +1,6 @@
 export type BillCategory = "housing" | "utilities" | "insurance" | "transport" | "groceries" | "childcare" | "subscriptions" | "loan" | "other";
 export type IncomeCategory = "paycheck" | "bonus" | "side" | "benefits" | "refund" | "other";
-export type Frequency = "weekly" | "biweekly" | "monthly" | "quarterly" | "annually" | "one-time";
+export type Frequency = "weekly" | "biweekly" | "semimonthly" | "monthly" | "quarterly" | "annually" | "one-time";
 
 export interface Bill {
   id: string;

@@ -23,27 +23,23 @@ export function CheckInWizard({ bills, income, previousBalance, onComplete, onCa
   const activeBills = bills.filter((b) => b.status === "active");
   const activeIncome = income.filter((i) => i.frequency !== "one-time");
 
+  const toWeekly = (amount: number, frequency: string) => {
+    if (frequency === "weekly") return amount;
+    if (frequency === "biweekly") return amount / 2;              // every 2 weeks
+    if (frequency === "semimonthly") return (amount * 2) / (52 / 12); // 2x/month → weekly
+    if (frequency === "monthly") return amount / (52 / 12);
+    if (frequency === "quarterly") return amount / 13;
+    if (frequency === "annually") return amount / 52;
+    return amount;
+  };
+
   const weeklyExpenses = useMemo(() =>
-    activeBills.reduce((sum, b) => {
-      if (b.frequency === "weekly") return sum + b.amount;
-      if (b.frequency === "biweekly") return sum + b.amount / 2;
-      if (b.frequency === "monthly") return sum + b.amount / 4.33;
-      if (b.frequency === "quarterly") return sum + b.amount / 13;
-      if (b.frequency === "annually") return sum + b.amount / 52;
-      return sum + b.amount;
-    }, 0),
+    activeBills.reduce((sum, b) => sum + toWeekly(b.amount, b.frequency), 0),
     [activeBills]
   );
 
   const weeklyIncome = useMemo(() =>
-    activeIncome.reduce((sum, i) => {
-      if (i.frequency === "weekly") return sum + i.amount;
-      if (i.frequency === "biweekly") return sum + i.amount / 2;
-      if (i.frequency === "monthly") return sum + i.amount / 4.33;
-      if (i.frequency === "quarterly") return sum + i.amount / 13;
-      if (i.frequency === "annually") return sum + i.amount / 52;
-      return sum + i.amount;
-    }, 0),
+    activeIncome.reduce((sum, i) => sum + toWeekly(i.amount, i.frequency), 0),
     [activeIncome]
   );
 
